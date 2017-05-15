@@ -1,12 +1,13 @@
 package fr.esigelec.bluetoothbot;
 
+import android.bluetooth.BluetoothDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
 public class ControlsActivity extends AppCompatActivity {
 
-    String device_name;
+    BluetoothDevice bluetoothDevice;
     TextView deviceName;
 
     @Override
@@ -17,11 +18,11 @@ public class ControlsActivity extends AppCompatActivity {
         // get the device name from previous activity
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            device_name = extras.getString("device_name");
+            bluetoothDevice = (BluetoothDevice) extras.get("BluetoothDevice");
         }
 
         // get title to change
         deviceName = (TextView) findViewById(R.id.deviceName);
-        deviceName.setText(device_name);
+        deviceName.setText(bluetoothDevice.getName());
     }
 }

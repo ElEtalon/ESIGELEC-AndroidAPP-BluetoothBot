@@ -1,10 +1,17 @@
 package fr.esigelec.bluetoothbot;
 
+import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -14,21 +21,27 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 public class HomeActivity extends AppCompatActivity {
 
     private ImageButton imgAboutButton;
     private Switch switchButton;
     private ListView listViewDevices;
+    private static final UUID BLUE_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothConnection bluetoothConnection;
+    private BluetoothSocket bTSocket;
 
     private boolean isConnected = false;
 
-    private ArrayList<String> deviceList = new ArrayList<String>();
+    private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
+    private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +51,6 @@ public class HomeActivity extends AppCompatActivity {
         /// BLUETOOTH
         // get the bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter);
 
         // turn on bluetooth
         this.turnOnBluetooth();
@@ -62,12 +74,12 @@ public class HomeActivity extends AppCompatActivity {
 
                 // Display paired devices
                 if (switchButton.isChecked()) {
-                    Toast.makeText(getApplicationContext(), "Switch button checked ", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Display paired devices", Toast.LENGTH_LONG).show();
                     displayPairedDevices();
 
                 // Display discovered devices
                 }else {
-                    Toast.makeText(getApplicationContext(), "Switch button unchecked", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Display discovery devices", Toast.LENGTH_LONG).show();
                     displayDiscoveredDevices();
                 }
             }
@@ -77,10 +89,18 @@ public class HomeActivity extends AppCompatActivity {
         this.listViewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(), "ListView item : " + position + " & id : " + deviceList.get((int)id), Toast.LENGTH_LONG).show();
-                Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
-                controlsPage.putExtra("device_name", deviceList.get((int)id));
-                startActivity(controlsPage);
+                BluetoothDevice selected = pairedDevices.get((int)id);
+
+                // connection
+                if(bluetoothConnect(selected)){
+                    // If connected
+                    Toast.makeText(getApplicationContext(), "Connection successful to " + selected.getName(), Toast.LENGTH_LONG).show();
+                    Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
+                    controlsPage.putExtra("BluetoothDevice", selected);
+                    startActivity(controlsPage);
+                }else{
+                    Toast.makeText(getApplicationContext(), "Connection error to " + selected.getName(), Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -99,6 +119,44 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
+     * Display paired bluetooth devices
+     */
+    private void displayPairedDevices(){
+        // get list of bluetooth Devices
+        this.getListPairedBluetooth();
+
+        // update the list
+        this.listViewUpdate(this.pairedDevices);
+    }
+
+    /**
+     * Display discovered bluetooth devices
+     */
+    private void displayDiscoveredDevices(){
+        // get list of bluetooth Devices
+        this.discoveredDevices = new ArrayList<BluetoothDevice>();
+        //getListDiscoveredBluetooth();
+
+        // update the list
+        this.listViewUpdate(this.discoveredDevices);
+    }
+
+    /**
+     * Update the listView
+     * @param
+     */
+    private void listViewUpdate(ArrayList<BluetoothDevice> deviceList){
+        ArrayList<String> deviceListExplained = new ArrayList<String>();
+
+        for(BluetoothDevice bt : deviceList){
+            deviceListExplained.add(bt.getName() + " (" + bt.getAddress() + ")");
+        }
+
+        this.listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceListExplained));
+    }
+
+    /// BLUETOOTH FUNCTIONS
+    /**
      * Turn on bluetooth
      * @param
      */
@@ -106,39 +164,125 @@ public class HomeActivity extends AppCompatActivity {
         if (!this.bluetoothAdapter.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
-            Toast.makeText(getApplicationContext(), "Turned on",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
         }
     }
 
     /**
-     *
-     */
-    private void displayPairedDevices(){
-        // get list of bluetooth Devices
-        this.deviceList = this.bluetoothConnection.getListPairedBluetooth(this.deviceList);
-
-        // update the list
-        this.listViewUpdate();
-    }
-
-    /**
-     *
-     */
-    private void displayDiscoveredDevices(){
-        // get list of bluetooth Devices
-        this.deviceList = new ArrayList<String>();
-
-        // update the list
-        this.listViewUpdate();
-    }
-
-    /**
-     * Update the listView
+     * Get the list of the bluetooth devices
      * @param
      */
-    private void listViewUpdate(){
-        this.listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, this.deviceList));
+    private void getListPairedBluetooth(){
+        // get list of devices
+        Set<BluetoothDevice>paired = this.bluetoothAdapter.getBondedDevices();
+        for(BluetoothDevice bt : paired){
+            this.pairedDevices.add(bt);
+        }
+
     }
+
+
+    /**
+     *
+     * @param bTDevice
+     * @return
+     */
+    private boolean bluetoothConnect(BluetoothDevice bTDevice) {
+        bTSocket = null;
+        try {
+            bTSocket = bTDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
+        } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            bTSocket.connect();
+        } catch(IOException e) {
+            try {
+                bTSocket.close();
+            } catch(IOException close) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     * @return
+     */
+    /*public boolean bluetoothConnectCancel() {
+        try {
+            bTSocket.close();
+        } catch(IOException e) {
+            Log.d("CONNECTTHREAD","Could not close connection:" + e.toString());
+            return false;
+        }
+        return true;
+    }*/
+
+    /**
+     * Begin bluetooth device discovery
+     * @param
+     */
+    /*private void getListDiscoveredBluetooth(){
+        if (this.bluetoothAdapter.isDiscovering()) {
+            this.bluetoothAdapter.cancelDiscovery();
+        }
+        this.bluetoothAdapter.startDiscovery();
+
+        //let's make a broadcast receiver to register our things
+        bluetoothReceiver = new BroadcastReceiver();
+        IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        this.registerReceiver(bluetoothReceiver, ifilter);
+    }
+
+
+
+
+    private final BroadcastReceiver bReciever = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                Log.d("DEVICELIST", "Bluetooth device found\n");
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // Create a new device item
+                DeviceItem newDevice = new DeviceItem(device.getName(), device.getAddress(), "false");
+                // Add it to our adapter
+                mAdapter.add(newDevice);
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };*/
+
+    /**
+     * @Override
+    public void onReceive(Context context, Intent intent) {
+    String action = intent.getAction();
+
+    // When discovery finds a device
+    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+    // Get the BluetoothDevice object from the Intent
+    BluetoothDevice device = intent
+    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+    // If it's already paired, skip it, because it's been listed
+    // already
+    if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+    mNewDevicesArrayAdapter.add(device.getName() + "\n"
+    + device.getAddress());
+    }
+    // When discovery is finished, change the Activity title
+    } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+    setProgressBarIndeterminateVisibility(false);
+    setTitle(R.string.select_device);
+    if (mNewDevicesArrayAdapter.getCount() == 0) {
+    String noDevices = getResources().getText(
+    R.string.none_found).toString();
+    mNewDevicesArrayAdapter.add(noDevices);
+    }
+    }
+    }
+     */
 }
