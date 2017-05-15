@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.content.Intent;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -20,7 +21,17 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "About button clicked", Toast.LENGTH_LONG).show();
+                //Log.i("clicks","You Clicked B1");
+                Intent aboutPage=new Intent(HomeActivity.this, AboutActivity.class);
+                startActivity(aboutPage);
             }
         });
     }
+
+    /*
+    public void onClick(View v){
+        if(v.getId()==R.id.imageAboutButton) {
+            Toast.makeText(getApplicationContext(), "About button clicked", Toast.LENGTH_LONG).show();
+        }
+    }*/
 }
