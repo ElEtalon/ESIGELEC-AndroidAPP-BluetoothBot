@@ -1,5 +1,14 @@
 <resources>
     <string name="app_name">BluetoothBot</string>
+    <string name="app_description">Bot control by bluetooth</string>
+
+
     <string name="title_activity_controls">Controls</string>
+
+
     <string name="text_choose_device">Choose a device</string>
+    <string name="text_version">Version</string>
+    <string name="text_creators">Creators</string>
+    <string name="text_author1">Mocquillon Paul</string>
+    <string name="text_author2">Bouquet Paul</string>
 </resources>

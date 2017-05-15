@@ -12,12 +12,23 @@
         tools:layout_editor_absoluteX="2dp"
         tools:layout_editor_absoluteY="1dp">
 
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_description"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            tools:layout_editor_absoluteX="102dp"
+            tools:layout_editor_absoluteY="81dp"
+            android:layout_below="@+id/imageAboutButton"
+            android:layout_toEndOf="@+id/textView" />
+
         <ListView
             android:layout_width="380dp"
             android:layout_height="234dp"
             tools:layout_editor_absoluteX="12dp"
             tools:layout_editor_absoluteY="269dp"
-            android:id="@+id/listView"
+            android:id="@+id/listViewDevices"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:layout_marginBottom="98dp" />
@@ -30,7 +41,7 @@
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="100dp"
             android:layout_marginBottom="17dp"
-            android:layout_above="@+id/listView"
+            android:layout_above="@+id/listViewDevices"
             android:layout_alignParentStart="true" />
 
         <ImageButton
