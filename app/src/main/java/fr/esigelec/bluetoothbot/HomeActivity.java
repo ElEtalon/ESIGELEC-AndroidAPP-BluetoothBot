@@ -33,7 +33,7 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton imgAboutButton;
     private Switch switchButton;
     private ListView listViewDevices;
-    private static final UUID BLUE_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    private static final UUID BLUE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bTSocket;
@@ -133,9 +133,11 @@ public class HomeActivity extends AppCompatActivity {
      * Display discovered bluetooth devices
      */
     private void displayDiscoveredDevices(){
-        // get list of bluetooth Devices
+        // reset list
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
-        //getListDiscoveredBluetooth();
+
+        // get list of bluetooth Devices
+        getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
@@ -189,100 +191,56 @@ public class HomeActivity extends AppCompatActivity {
      * @param bTDevice
      * @return
      */
-    private boolean bluetoothConnect(BluetoothDevice bTDevice) {
-        bTSocket = null;
+    private boolean bluetoothConnect(BluetoothDevice bluetoothDevice) {
         try {
-            bTSocket = bTDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
-        } catch (IOException e) {
-            return false;
-        }
-
-        try {
-            bTSocket.connect();
-        } catch(IOException e) {
             try {
-                bTSocket.close();
-            } catch(IOException close) {
+                bTSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
+            } catch (Exception ce){
                 return false;
             }
-        }
-        return true;
-    }
 
-    /**
-     *
-     * @return
-     */
-    /*public boolean bluetoothConnectCancel() {
-        try {
-            bTSocket.close();
-        } catch(IOException e) {
-            Log.d("CONNECTTHREAD","Could not close connection:" + e.toString());
+            bTSocket.connect();
+
+            return true;
+        } catch (Exception e) {
+            bTSocket = null;
             return false;
         }
-        return true;
-    }*/
+    }
 
     /**
      * Begin bluetooth device discovery
      * @param
      */
-    /*private void getListDiscoveredBluetooth(){
+    private void getListDiscoveredBluetooth(){
         if (this.bluetoothAdapter.isDiscovering()) {
             this.bluetoothAdapter.cancelDiscovery();
         }
         this.bluetoothAdapter.startDiscovery();
-
-        //let's make a broadcast receiver to register our things
-        bluetoothReceiver = new BroadcastReceiver();
+        
         IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         this.registerReceiver(bluetoothReceiver, ifilter);
     }
 
-
-
-
-    private final BroadcastReceiver bReciever = new BroadcastReceiver() {
+    /**
+     * Bluetooth Receiver from discovery
+     */
+    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                Log.d("DEVICELIST", "Bluetooth device found\n");
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // Notification
+                Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
+
                 // Create a new device item
-                DeviceItem newDevice = new DeviceItem(device.getName(), device.getAddress(), "false");
-                // Add it to our adapter
-                mAdapter.add(newDevice);
-                mAdapter.notifyDataSetChanged();
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                // Add to the list
+                discoveredDevices.add(device);
+
+                //bluetoothAdapter.notifyDataSetChanged();
             }
         }
-    };*/
+    };
 
-    /**
-     * @Override
-    public void onReceive(Context context, Intent intent) {
-    String action = intent.getAction();
-
-    // When discovery finds a device
-    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-    // Get the BluetoothDevice object from the Intent
-    BluetoothDevice device = intent
-    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-    // If it's already paired, skip it, because it's been listed
-    // already
-    if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-    mNewDevicesArrayAdapter.add(device.getName() + "\n"
-    + device.getAddress());
-    }
-    // When discovery is finished, change the Activity title
-    } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-    setProgressBarIndeterminateVisibility(false);
-    setTitle(R.string.select_device);
-    if (mNewDevicesArrayAdapter.getCount() == 0) {
-    String noDevices = getResources().getText(
-    R.string.none_found).toString();
-    mNewDevicesArrayAdapter.add(noDevices);
-    }
-    }
-    }
-     */
 }
