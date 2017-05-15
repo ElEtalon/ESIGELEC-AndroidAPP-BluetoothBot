@@ -1,6 +1,5 @@
 package fr.esigelec.bluetoothbot;
 
-import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -9,21 +8,15 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -111,7 +104,6 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "About button clicked", Toast.LENGTH_LONG).show();
-                //Log.i("clicks","You Clicked B1");
                 Intent aboutPage=new Intent(HomeActivity.this, AboutActivity.class);
                 startActivity(aboutPage);
             }
@@ -185,10 +177,9 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
-
     /**
      *
-     * @param bTDevice
+     * @param bluetoothDevice
      * @return
      */
     private boolean bluetoothConnect(BluetoothDevice bluetoothDevice) {
@@ -198,9 +189,7 @@ public class HomeActivity extends AppCompatActivity {
             } catch (Exception ce){
                 return false;
             }
-
             bTSocket.connect();
-
             return true;
         } catch (Exception e) {
             bTSocket = null;
@@ -217,7 +206,7 @@ public class HomeActivity extends AppCompatActivity {
             this.bluetoothAdapter.cancelDiscovery();
         }
         this.bluetoothAdapter.startDiscovery();
-        
+
         IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         this.registerReceiver(bluetoothReceiver, ifilter);
     }
@@ -237,8 +226,6 @@ public class HomeActivity extends AppCompatActivity {
 
                 // Add to the list
                 discoveredDevices.add(device);
-
-                //bluetoothAdapter.notifyDataSetChanged();
             }
         }
     };
