@@ -46,30 +46,32 @@ public class HomeActivity extends AppCompatActivity {
         /// LIST VIEW
         // get the list
         this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
+        // first display paired
+        displayPairedDevices();
 
         /// Switch
         // get the switch
         switchButton = (Switch) findViewById(R.id.discover_paired);
         // set the switch off
-        switchButton.setChecked(false);
+        switchButton.setChecked(true);
 
-        // Switch listenner
+        // Switch listener
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String statusSwitch1, statusSwitch2;
-                if (switchButton.isChecked())
+
+                // Display paired devices
+                if (switchButton.isChecked()) {
                     Toast.makeText(getApplicationContext(), "Switch button checked ", Toast.LENGTH_LONG).show();
-                else
+                    displayPairedDevices();
+
+                // Display discovered devices
+                }else {
                     Toast.makeText(getApplicationContext(), "Switch button unchecked", Toast.LENGTH_LONG).show();
+                    displayDiscoveredDevices();
+                }
             }
         });
-
-        // get list of bluetooth Devices
-        deviceList = bluetoothConnection.getListPairedBluetooth(deviceList);
-
-        // update the list
-        this.listViewUpdate();
 
         // On click list
         this.listViewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -108,6 +110,28 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     *
+     */
+    private void displayPairedDevices(){
+        // get list of bluetooth Devices
+        this.deviceList = this.bluetoothConnection.getListPairedBluetooth(this.deviceList);
+
+        // update the list
+        this.listViewUpdate();
+    }
+
+    /**
+     *
+     */
+    private void displayDiscoveredDevices(){
+        // get list of bluetooth Devices
+        this.deviceList = new ArrayList<String>();
+
+        // update the list
+        this.listViewUpdate();
     }
 
     /**
