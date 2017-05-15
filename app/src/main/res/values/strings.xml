@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BluetoothBot</string>
+    <string name="title_activity_controls">Controls</string>
+    <string name="text_choose_device">Choose a device</string>
 </resources>
