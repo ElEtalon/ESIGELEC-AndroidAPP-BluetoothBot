@@ -42,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(getApplicationContext(), "ListView item : " + position + " & id : " + deviceList.get((int)id), Toast.LENGTH_LONG).show();
                 Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
+                controlsPage.putExtra("device_name",deviceList.get((int)id));
                 startActivity(controlsPage);
             }
         });
