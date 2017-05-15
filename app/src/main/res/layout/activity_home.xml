@@ -6,28 +6,44 @@
     android:layout_height="match_parent"
     tools:context="fr.esigelec.bluetoothbot.HomeActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_choose_device"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="100dp" />
+    <RelativeLayout
+        android:layout_width="378dp"
+        android:layout_height="511dp"
+        tools:layout_editor_absoluteX="2dp"
+        tools:layout_editor_absoluteY="1dp">
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        style="@android:style/Widget.ImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="doGoAbout"
-        app:srcCompat="@drawable/petit_logo"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp" />
+        <ListView
+            android:layout_width="380dp"
+            android:layout_height="234dp"
+            tools:layout_editor_absoluteX="12dp"
+            tools:layout_editor_absoluteY="269dp"
+            android:id="@+id/listView"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="98dp" />
 
-    <ListView
-        android:layout_width="380dp"
-        android:layout_height="234dp"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="269dp" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_choose_device"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="100dp"
+            android:layout_marginBottom="17dp"
+            android:layout_above="@+id/listView"
+            android:layout_alignParentStart="true" />
+
+        <ImageButton
+            android:id="@+id/imageAboutButton"
+            style="@android:style/Widget.ImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/petit_logo"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="12dp" />
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
