@@ -1,5 +1,7 @@
 package fr.esigelec.bluetoothbot;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,13 +13,12 @@ import android.widget.Toast;
 import android.content.Intent;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
 
     ImageButton imgAboutButton;
     ListView listViewDevices;
-
-    String[] devices = new String[] { "Device0", "Device3", "Device2", "Device1"};
     final ArrayList<String> deviceList = new ArrayList<String>();
 
     @Override
@@ -29,10 +30,13 @@ public class HomeActivity extends AppCompatActivity {
         // Devices
         listViewDevices =(ListView)findViewById(R.id.listViewDevices);
 
-        // List view devices update
-        for (int i = 0; i < devices.length; ++i) {
-            deviceList.add(devices[i]);
-        }
+        // get list of devices
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+        for(BluetoothDevice bt : pairedDevices)
+            deviceList.add(bt.getName());
+
         listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceList));
 
 
