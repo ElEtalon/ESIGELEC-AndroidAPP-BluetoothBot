@@ -17,6 +17,8 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -30,6 +32,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bTSocket;
+    private InputStream bTInputStream;
+    private OutputStream bTOutputStream;
 
     private boolean isConnected = false;
 
@@ -183,15 +187,16 @@ public class HomeActivity extends AppCompatActivity {
      * @param bluetoothDevice
      * @return
      */
-    private void bluetoothConnectThread(BluetoothDevice bluetoothDevice) {
-        BluetoothSocket tmp = null;
+    private boolean bluetoothConnectThread(BluetoothDevice bluetoothDevice) {
+        this.bTSocket = null;
 
         try {
-            tmp = bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
+            this.bTSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
+            return true;
         } catch (Exception e){
             Toast.makeText(getApplicationContext(), "Error when create connection socket " + e,Toast.LENGTH_LONG).show();
         }
-        this.bTSocket = tmp;
+        return false;
     }
 
     /**
@@ -200,25 +205,40 @@ public class HomeActivity extends AppCompatActivity {
      * @return
      */
     private boolean bluetoothConnect(BluetoothDevice bluetoothDevice){
-        this.bluetoothConnectThread(bluetoothDevice);
-
-        if (this.bluetoothAdapter.isDiscovering()) {
-            this.bluetoothAdapter.cancelDiscovery();
-        }
-
-        Toast.makeText(getApplicationContext(), "Try to connect...",Toast.LENGTH_LONG).show();
-        try {
-            bTSocket.connect();
-            return true;
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Error when connecting " + e,Toast.LENGTH_LONG).show();
-            // Close the socket
-            try {
-                //bTSocket.close();
-            } catch (Exception e2) {
-                Toast.makeText(getApplicationContext(), "Error when closing the socket " + e,Toast.LENGTH_LONG).show();
+        if(this.bluetoothConnectThread(bluetoothDevice)) {
+            if (this.bluetoothAdapter.isDiscovering()) {
+                this.bluetoothAdapter.cancelDiscovery();
             }
-            return false;
+
+            Toast.makeText(getApplicationContext(), "Try to connect...", Toast.LENGTH_LONG).show();
+            try {
+                bTSocket.connect();
+                return true;
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Error when connecting " + e, Toast.LENGTH_LONG).show();
+                // Close the socket
+                try {
+                    bTSocket.close();
+                } catch (Exception e2) {
+                    Toast.makeText(getApplicationContext(), "Error when closing the socket " + e, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * bluetoothStream
+     * @param bluetoothDevice
+     */
+    private void bluetoothStream(BluetoothDevice bluetoothDevice){
+        bTInputStream   = null;
+        bTOutputStream  = null;
+        try {
+            bTOutputStream = bTSocket.getOutputStream();
+            bTInputStream  = bTSocket.getInputStream();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Error when opening the bluetooth stream " + e, Toast.LENGTH_LONG).show();
         }
     }
 
