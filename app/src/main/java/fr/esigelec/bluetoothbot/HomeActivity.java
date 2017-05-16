@@ -26,9 +26,10 @@ public class HomeActivity extends AppCompatActivity {
     private ListView listViewDevices;
 
     private BluetoothAdapter bluetoothAdapter;
+    private BluetoothSearch bluetoothSearch;
 
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
-    private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();;
+    private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +43,14 @@ public class HomeActivity extends AppCompatActivity {
         // turn on bluetooth
         this.turnOnBluetooth();
 
+        // Create bluetoothSearch Class
+        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
+
         /// LIST VIEW
         // get the list
         this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
         // first display paired
-        displayPairedDevices();
+        this.displayPairedDevices();
 
         /// Switch
         // get the switch
@@ -75,12 +79,26 @@ public class HomeActivity extends AppCompatActivity {
         // On click list
         this.listViewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                BluetoothDevice selected = pairedDevices.get((int)id);
+            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
+                final BluetoothDevice selected = pairedDevices.get((int)id);
 
-                Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
-                controlsPage.putExtra("BluetoothDevice", selected);
-                startActivity(controlsPage);
+                Toast.makeText(getApplicationContext(), "Connection to " + selected.getName() + "...", Toast.LENGTH_LONG).show();
+
+                // try to connect
+                Thread tryConnection = new Thread() {
+                    public void run() {
+                        // bluetooth connection class
+                        BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, selected);
+
+                        // if connected
+                        if(bluetoothConnection.bluetoothConnect(selected)){
+                            Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
+                            controlsPage.putExtra("BluetoothDevice", selected);
+                            startActivity(controlsPage);
+                        }
+                    }
+                };
+                tryConnection.start();
             }
         });
 
@@ -101,8 +119,11 @@ public class HomeActivity extends AppCompatActivity {
      * Display paired bluetooth devices
      */
     private void displayPairedDevices(){
+        // reset list
+        this.pairedDevices = new ArrayList<BluetoothDevice>();
+
         // get list of bluetooth Devices
-        this.getListPairedBluetooth();
+        this.pairedDevices = this.bluetoothSearch.getListPairedBluetooth();
 
         // update the list
         this.listViewUpdate(this.pairedDevices);
@@ -116,7 +137,7 @@ public class HomeActivity extends AppCompatActivity {
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
         // get list of bluetooth Devices
-        getListDiscoveredBluetooth();
+        this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
@@ -136,7 +157,6 @@ public class HomeActivity extends AppCompatActivity {
         this.listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceListExplained));
     }
 
-    /// BLUETOOTH FUNCTIONS
     /**
      * Turn on bluetooth
      * @param
@@ -150,53 +170,4 @@ public class HomeActivity extends AppCompatActivity {
             //Toast.makeText(getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
         }
     }
-
-    /**
-     * Get the list of the bluetooth devices
-     * @param
-     */
-    private void getListPairedBluetooth(){
-        this.pairedDevices = new ArrayList<BluetoothDevice>();
-        // get list of devices
-        Set<BluetoothDevice>paired = this.bluetoothAdapter.getBondedDevices();
-        for(BluetoothDevice bt : paired){
-            this.pairedDevices.add(bt);
-        }
-
-    }
-
-
-    /**
-     * Begin bluetooth device discovery
-     * @param
-     */
-    private void getListDiscoveredBluetooth(){
-        if (this.bluetoothAdapter.isDiscovering()) {
-            this.bluetoothAdapter.cancelDiscovery();
-        }
-        this.bluetoothAdapter.startDiscovery();
-
-        IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        this.registerReceiver(bluetoothReceiver, ifilter);
-    }
-
-    /**
-     * Bluetooth Receiver from discovery
-     */
-    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Notification
-                Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
-
-                // Create a new device item
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                // Add to the list
-                discoveredDevices.add(device);
-            }
-        }
-    };
-
 }
