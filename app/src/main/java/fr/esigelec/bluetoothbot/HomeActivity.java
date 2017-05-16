@@ -2,7 +2,6 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -17,25 +16,16 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
 
 public class HomeActivity extends AppCompatActivity {
 
     private ImageButton imgAboutButton;
     private Switch switchButton;
     private ListView listViewDevices;
-    private static final UUID BLUE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSocket bTSocket;
-    private InputStream bTInputStream;
-    private OutputStream bTOutputStream;
-
-    private boolean isConnected = false;
 
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
     private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();;
@@ -88,16 +78,9 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 BluetoothDevice selected = pairedDevices.get((int)id);
 
-                // connection
-                if(bluetoothConnect(selected)){
-                    // If connected
-                    Toast.makeText(getApplicationContext(), "Connection successful to " + selected.getName(), Toast.LENGTH_LONG).show();
-                    Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
-                    controlsPage.putExtra("BluetoothDevice", selected);
-                    startActivity(controlsPage);
-                }else{
-                    Toast.makeText(getApplicationContext(), "Connection error to " + selected.getName(), Toast.LENGTH_LONG).show();
-                }
+                Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
+                controlsPage.putExtra("BluetoothDevice", selected);
+                startActivity(controlsPage);
             }
         });
 
@@ -182,65 +165,6 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * bluetoothConnectThread
-     * @param bluetoothDevice
-     * @return
-     */
-    private boolean bluetoothConnectThread(BluetoothDevice bluetoothDevice) {
-        this.bTSocket = null;
-
-        try {
-            this.bTSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
-            return true;
-        } catch (Exception e){
-            Toast.makeText(getApplicationContext(), "Error when create connection socket " + e,Toast.LENGTH_LONG).show();
-        }
-        return false;
-    }
-
-    /**
-     * bluetoothConnect
-     * @param bluetoothDevice
-     * @return
-     */
-    private boolean bluetoothConnect(BluetoothDevice bluetoothDevice){
-        if(this.bluetoothConnectThread(bluetoothDevice)) {
-            if (this.bluetoothAdapter.isDiscovering()) {
-                this.bluetoothAdapter.cancelDiscovery();
-            }
-
-            Toast.makeText(getApplicationContext(), "Try to connect...", Toast.LENGTH_LONG).show();
-            try {
-                bTSocket.connect();
-                return true;
-            } catch (Exception e) {
-                Toast.makeText(getApplicationContext(), "Error when connecting " + e, Toast.LENGTH_LONG).show();
-                // Close the socket
-                try {
-                    bTSocket.close();
-                } catch (Exception e2) {
-                    Toast.makeText(getApplicationContext(), "Error when closing the socket " + e, Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * bluetoothStream
-     * @param bluetoothDevice
-     */
-    private void bluetoothStream(BluetoothDevice bluetoothDevice){
-        bTInputStream   = null;
-        bTOutputStream  = null;
-        try {
-            bTOutputStream = bTSocket.getOutputStream();
-            bTInputStream  = bTSocket.getInputStream();
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Error when opening the bluetooth stream " + e, Toast.LENGTH_LONG).show();
-        }
-    }
 
     /**
      * Begin bluetooth device discovery
