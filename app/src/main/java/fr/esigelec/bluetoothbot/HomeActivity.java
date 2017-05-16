@@ -91,8 +91,8 @@ public class HomeActivity extends AppCompatActivity {
                         BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, selected);
 
                         // if connected
-                        if(bluetoothConnection.bluetoothConnect(selected)){
-                            Intent controlsPage=new Intent(HomeActivity.this, ControlsActivity.class);
+                        if(!bluetoothConnection.bluetoothConnect(selected)) {
+                            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
                             controlsPage.putExtra("BluetoothDevice", selected);
                             startActivity(controlsPage);
                         }

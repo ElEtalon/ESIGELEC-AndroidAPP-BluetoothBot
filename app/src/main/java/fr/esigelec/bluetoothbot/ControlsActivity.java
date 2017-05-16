@@ -40,7 +40,7 @@ public class ControlsActivity extends AppCompatActivity {
         this.deviceName.setText(this.bluetoothDevice.getName());
 
         // show connection success
-        Toast.makeText(getApplicationContext(), "Connection successful to " + this.deviceName, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Connection successful to " + this.bluetoothDevice.getName(), Toast.LENGTH_LONG).show();
 
         // check if connected
         /*Thread tryConnection = new Thread() {
