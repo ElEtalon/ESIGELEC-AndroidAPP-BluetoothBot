@@ -5,6 +5,11 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +21,14 @@ public class ControlsActivity extends AppCompatActivity {
     private BluetoothConnection bluetoothConnection;
 
     private TextView deviceName;
-
+    private Switch switchMode;
+    private Button goBottom;
+    private Button goForward;
+    private Button goLeft;
+    private Button goRight;
+    private Button buttonPlus;
+    private Button buttonMinus;
+    private ImageButton imageButtonPower;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +51,16 @@ public class ControlsActivity extends AppCompatActivity {
         this.deviceName = (TextView) findViewById(R.id.deviceName);
         this.deviceName.setText(this.bluetoothDevice.getName());
 
+        // get buttons
+        this.switchMode         = (Switch) findViewById(R.id.SwitchMode);
+        this.goBottom           = (Button) findViewById(R.id.GoBottom);
+        this.goForward          = (Button) findViewById(R.id.GoForward);
+        this.goLeft             = (Button) findViewById(R.id.GoLeft);
+        this.goRight            = (Button) findViewById(R.id.GoRight);
+        this.buttonMinus        = (Button) findViewById(R.id.ButtonMinus);
+        this.buttonPlus         = (Button) findViewById(R.id.ButtonPlus);
+        this.imageButtonPower   = (ImageButton) findViewById(R.id.ImageButtonPower);
+
         // show connection success
         Toast.makeText(getApplicationContext(), "Connection successful to " + this.bluetoothDevice.getName(), Toast.LENGTH_LONG).show();
 
@@ -60,5 +82,36 @@ public class ControlsActivity extends AppCompatActivity {
         tryConnection.start();*/
 
 
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.GoBottom:
+                Toast.makeText(getApplicationContext(), "Go Bottom", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.GoForward:
+                Toast.makeText(getApplicationContext(), "Go Forward", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.GoLeft:
+                Toast.makeText(getApplicationContext(), "Go Left", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.GoRight:
+                Toast.makeText(getApplicationContext(), "Go Right", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.ButtonMinus:
+                Toast.makeText(getApplicationContext(), "Speed -", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.ButtonPlus:
+                Toast.makeText(getApplicationContext(), "Speed +", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.ImageButtonPower:
+                Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.SwitchMode:
+                Toast.makeText(getApplicationContext(), "Switched", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
     }
 }

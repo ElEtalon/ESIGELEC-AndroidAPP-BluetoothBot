@@ -30,92 +30,98 @@
         </ScrollView>
 
         <Button
-            android:id="@+id/button7"
+            android:id="@+id/GoBottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/button9"
+            android:layout_alignStart="@+id/GoForward"
             android:layout_centerVertical="true"
+            android:onClick="onClick"
             android:text="^"
             tools:layout_editor_absoluteX="151dp"
             tools:layout_editor_absoluteY="250dp"
             tools:rotation="180" />
 
         <Button
-            android:id="@+id/button9"
+            android:id="@+id/GoForward"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/button5"
+            android:layout_above="@+id/GoLeft"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="14dp"
             android:text="^"
-            app:layout_constraintBottom_toTopOf="@+id/button7"
+            android:onClick="onClick"
+            app:layout_constraintBottom_toTopOf="@+id/GoBottom"
             tools:layout_editor_absoluteX="151dp" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/GoRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/GoForward"
+            android:layout_toEndOf="@+id/GoBottom"
             android:rotation="90"
             android:text="^"
-            app:layout_constraintBottom_toTopOf="@+id/button7"
-            tools:layout_editor_absoluteX="241dp"
-            android:layout_below="@+id/button9"
-            android:layout_toEndOf="@+id/button7" />
+            android:onClick="onClick"
+            app:layout_constraintBottom_toTopOf="@+id/GoBottom"
+            tools:layout_editor_absoluteX="241dp" />
 
         <Button
-            android:id="@+id/button5"
+            android:id="@+id/GoLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/GoBottom"
+            android:layout_toStartOf="@+id/GoBottom"
             android:rotation="270"
             android:text="^"
-            app:layout_constraintBottom_toTopOf="@+id/button7"
-            tools:layout_editor_absoluteX="63dp"
-            android:layout_above="@+id/button7"
-            android:layout_toStartOf="@+id/button7" />
+            android:onClick="onClick"
+            app:layout_constraintBottom_toTopOf="@+id/GoBottom"
+            tools:layout_editor_absoluteX="63dp" />
 
         <TextView
-            android:id="@+id/textView12"
+            android:id="@+id/textViewSpeed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/button4"
-            android:layout_alignStart="@+id/button4"
+            android:layout_above="@+id/ButtonPlus"
+            android:layout_alignStart="@+id/ButtonPlus"
             android:layout_marginStart="17dp"
             android:text="Speed"
             tools:layout_editor_absoluteX="303dp"
             tools:layout_editor_absoluteY="281dp" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/textViewConsole"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/button3"
+            android:layout_alignBottom="@+id/ButtonMinus"
             android:layout_centerHorizontal="true"
             android:text="Console"
             tools:layout_editor_absoluteX="167dp"
             tools:layout_editor_absoluteY="396dp" />
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/ButtonPlus"
             android:layout_width="88dp"
             android:layout_height="48dp"
-            android:layout_above="@+id/button3"
-            android:layout_alignStart="@+id/button3"
+            android:layout_above="@+id/ButtonMinus"
+            android:layout_alignStart="@+id/ButtonMinus"
             android:text="+"
+            android:onClick="onClick"
             tools:layout_editor_absoluteX="280dp"
             tools:layout_editor_absoluteY="311dp" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/ButtonMinus"
             android:layout_width="88dp"
             android:layout_height="48dp"
-            android:layout_alignBottom="@+id/textView4"
-            android:layout_alignEnd="@+id/imageButton"
+            android:layout_alignBottom="@+id/textViewAutomated"
+            android:layout_alignEnd="@+id/ImageButtonPower"
             android:text="-"
+            android:onClick="onClick"
             tools:layout_editor_absoluteX="280dp"
             tools:layout_editor_absoluteY="365dp" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/textViewAutomated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/scrollView2"
@@ -127,24 +133,25 @@
             tools:layout_editor_absoluteY="391dp" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/textViewManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/switch3"
-            android:layout_alignEnd="@+id/switch3"
+            android:layout_above="@+id/SwitchMode"
+            android:layout_alignEnd="@+id/SwitchMode"
             android:layout_marginBottom="15dp"
             android:text="Manual"
-            app:layout_constraintBottom_toTopOf="@+id/switch3"
+            app:layout_constraintBottom_toTopOf="@+id/SwitchMode"
             tools:layout_editor_absoluteX="34dp" />
 
         <Switch
-            android:id="@+id/switch3"
+            android:id="@+id/SwitchMode"
             android:layout_width="44dp"
             android:layout_height="31dp"
-            android:layout_above="@+id/textView6"
-            android:layout_alignStart="@+id/button5"
+            android:layout_above="@+id/textViewConsole"
+            android:layout_alignStart="@+id/GoLeft"
             android:layout_marginBottom="17dp"
-            app:layout_constraintBottom_toTopOf="@+id/textView4"
+            android:onClick="onClick"
+            app:layout_constraintBottom_toTopOf="@+id/textViewAutomated"
             tools:layout_editor_absoluteX="34dp"
             tools:rotation="90" />
 
@@ -152,7 +159,7 @@
             android:id="@+id/deviceName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/imageButton"
+            android:layout_alignTop="@+id/ImageButtonPower"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
             android:text="none"
@@ -161,12 +168,13 @@
             tools:layout_editor_absoluteY="35dp" />
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ImageButtonPower"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/imageButton4"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="18dp"
+            android:onClick="onClick"
             app:srcCompat="@android:drawable/ic_lock_power_off"
             tools:layout_editor_absoluteX="312dp"
             tools:layout_editor_absoluteY="16dp" />
@@ -177,6 +185,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
+            android:onClick="onClick"
             app:srcCompat="@drawable/petit_logo"
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="16dp"
