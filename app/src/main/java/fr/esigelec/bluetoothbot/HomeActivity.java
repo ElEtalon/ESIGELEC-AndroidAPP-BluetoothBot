@@ -72,7 +72,7 @@ public class HomeActivity extends AppCompatActivity {
         * Connectivity
         */
         // Instance connectivity Manager class
-        this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        /*this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         // get text view
         this.textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
@@ -82,7 +82,7 @@ public class HomeActivity extends AppCompatActivity {
         this.connectivity = new Connectivity(textConnectivity, connectivityManager);
 
         // execute request
-        new RequeteHttp().execute(this.textConnectivity);
+        new RequeteHttp().execute(this.textConnectivity);*/
 
         /*
         * Luminiosity utils
@@ -126,7 +126,7 @@ public class HomeActivity extends AppCompatActivity {
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
+        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this);
 
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);

@@ -1,10 +1,12 @@
 package fr.esigelec.bluetoothbot;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,13 +20,16 @@ import java.util.Set;
 public class BluetoothSearch {
 
     private BluetoothAdapter bluetoothAdapter;
+    private BroadcastReceiver broadcastReceiver;
     private boolean bluetoothState;
+    private Activity activity;
 
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
 
-    public BluetoothSearch(BluetoothAdapter adapter){
+    public BluetoothSearch(BluetoothAdapter adapter, Activity activity){
         this.bluetoothAdapter   = adapter;
+        this.activity           = activity;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
         this.bluetoothState     = this.bluetoothAdapter.isEnabled();
@@ -107,27 +112,43 @@ public class BluetoothSearch {
         }
         this.bluetoothAdapter.startDiscovery();
 
-        //IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        //this.registerReceiver(bluetoothReceiver, ifilter);
+        // init array
+        this.discoveredDevices = new ArrayList<BluetoothDevice>();
+
+        /**
+         * Bluetooth Receiver from discovery
+         */
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Notification
+                    //Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
+                    Log.i("BluetoothSearch", "Device found");
+
+                    // Create a new device item
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                    // Add to the list
+                    discoveredDevices.add(device);
+                }
+
+                if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
+                    Log.i("BluetoothSearch", "Discovery ended");
+                }
+            }
+        };
+
+        this.activity.registerReceiver(this.broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        this.activity.registerReceiver(this.broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
     }
 
-    /**
-     * Bluetooth Receiver from discovery
-     */
-    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Notification
-                //Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
-                Log.i("BluetoothSearch", "Device found");
 
-                // Create a new device item
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+    // On destroy
+    protected void onDestroy(){
+        this.bluetoothAdapter.cancelDiscovery();
+        this.activity.unregisterReceiver(this.broadcastReceiver);
+    }
 
-                // Add to the list
-                discoveredDevices.add(device);
-            }
-        }
-    };
 }
