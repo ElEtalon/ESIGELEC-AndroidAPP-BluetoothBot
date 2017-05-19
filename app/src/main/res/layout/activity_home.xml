@@ -7,10 +7,10 @@
     tools:context="fr.esigelec.bluetoothbot.HomeActivity">
 
     <RelativeLayout
-        android:layout_width="378dp"
-        android:layout_height="511dp"
-        tools:layout_editor_absoluteX="3dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
 
         <TextView
             android:id="@+id/textView13"
@@ -74,7 +74,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="12dp"
             app:srcCompat="@drawable/petit_logo"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="2dp" />
@@ -83,8 +82,8 @@
             android:id="@+id/discover_paired"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="28dp"
             android:layout_alignBottom="@+id/textView"
+            android:layout_marginEnd="28dp"
             android:layout_toStartOf="@+id/textView" />
 
         <TextView
@@ -94,51 +93,49 @@
             android:layout_alignEnd="@+id/textView13"
             android:layout_alignTop="@+id/imageAboutButton"
             android:text="Connect..." />
-      
+
         <TextView
             android:id="@+id/textViewBlueActivate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bluetooth"
             android:layout_above="@+id/toggleBluetooth"
-            android:layout_toStartOf="@+id/textView13" />
+            android:layout_toStartOf="@+id/textView13"
+            android:text="Bluetooth" />
 
         <ToggleButton
             android:id="@+id/toggleBluetooth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ToggleButton"
-            android:layout_marginBottom="16dp"
             android:layout_above="@+id/discover_paired"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="26dp" />
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="26dp"
+            android:text="ToggleButton" />
 
         <SeekBar
             android:id="@+id/seekBarLuminiosity"
-            style="@android:style/Widget.DeviceDefault.SeekBar"
-            android:layout_width="90dp"
+            style="@android:style/Widget.Material.SeekBar.Discrete"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textViewLux"
-            android:layout_marginEnd="14dp"
-            android:layout_toStartOf="@+id/checkBoxAutoLux" />
+            android:layout_alignBottom="@+id/checkBoxAutoLux"
+            android:layout_alignStart="@+id/textView16"
+            android:layout_alignTop="@+id/toggleBluetooth" />
 
         <TextView
             android:id="@+id/textViewLux"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Luminiosity"
-            android:layout_above="@+id/checkBoxAutoLux"
-            android:layout_alignEnd="@+id/textView13"
-            android:layout_marginEnd="16dp" />
+            android:layout_above="@+id/seekBarLuminiosity"
+            android:layout_alignEnd="@+id/discover_paired" />
 
         <CheckBox
             android:id="@+id/checkBoxAutoLux"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Auto"
-            android:layout_alignBaseline="@+id/toggleBluetooth"
-            android:layout_alignBottom="@+id/toggleBluetooth"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignTop="@+id/textViewBlueActivate"
+            android:layout_toEndOf="@+id/discover_paired" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

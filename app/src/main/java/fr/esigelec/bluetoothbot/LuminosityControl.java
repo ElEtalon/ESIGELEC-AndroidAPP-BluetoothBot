@@ -57,7 +57,7 @@ public class LuminosityControl {
         if(this.currentLuminosity + maxLum > 255){
             this.currentLuminosity = maxLum;
         }else{
-            this.currentLuminosity += newLum;
+            this.currentLuminosity = newLum;
         }
     }
 
@@ -82,39 +82,11 @@ public class LuminosityControl {
         changeCurrentSystemLuminosity(resolver, progress);
     }
 
-    private void changeCurrentSystemLuminosity(ContentResolver resolver, int lux){
-        Settings.System.putInt(resolver, Settings.System.SCREEN_BRIGHTNESS, lux);
-    }
-
-    /**
-     * Set Mode auto change luminosity on sensor change
-     */
-    private void autoModeLuminosity(final ContentResolver resolver){
-         this.luminosityListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-                setCurrentLuminosity(event.values[0]);
-
-                // update system new luminosity
-                changeCurrentSystemLuminosity(resolver, (int) currentLuminosity);
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                // void
-            }
-        };
-
-        // register listener
-        this.sensorManager.registerListener(this.luminosityListener, this.lightSensor, SensorManager.SENSOR_DELAY_UI);
-    }
-
-    /**
-     * Stop autoMode by deleting listener
-     */
-    private void stopAutoModeLuminosity(){
-        if(this.luminosityListener != null){
-            this.sensorManager.unregisterListener(this.luminosityListener);
+    private void changeCurrentSystemLuminosity(ContentResolver resolver, int value){
+        if(this.luminosityMode) {
+            Settings.System.putInt(resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, value);
+        }else{
+            Settings.System.putInt(resolver, Settings.System.SCREEN_BRIGHTNESS, value);
         }
     }
 
@@ -125,9 +97,9 @@ public class LuminosityControl {
     public void setLuminosityMode(Boolean newMode, ContentResolver resolver){
         this.luminosityMode = newMode;
         if(this.luminosityMode){
-            this.autoModeLuminosity(resolver);
+            this.changeCurrentSystemLuminosity(resolver, Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         }else{
-            this.stopAutoModeLuminosity();
+            this.changeCurrentSystemLuminosity(resolver, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         }
     }
 
