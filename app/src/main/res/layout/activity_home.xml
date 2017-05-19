@@ -86,6 +86,14 @@
             android:layout_marginEnd="28dp"
             android:layout_alignBottom="@+id/textView"
             android:layout_toStartOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/TextConnectivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView13"
+            android:layout_alignTop="@+id/imageAboutButton"
+            android:text="Connect..." />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 
@@ -35,6 +37,14 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        //Connectivity
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        TextView textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
+        textConnectivity.setText("OnCreate");
+        Connectivity connectivity = new Connectivity(textConnectivity, connectivityManager);
+        new RequeteHttp().execute(textConnectivity);
+        //------------
 
         /// BLUETOOTH
         // get the bluetooth adapter
