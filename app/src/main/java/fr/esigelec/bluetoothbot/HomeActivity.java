@@ -11,7 +11,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -49,19 +51,28 @@ public class HomeActivity extends AppCompatActivity {
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
     private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
         //Connectivity
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        /*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         TextView textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
         textConnectivity.setText("OnCreate");
         Connectivity connectivity = new Connectivity(textConnectivity, connectivityManager);
         new RequeteHttp().execute(textConnectivity);
-        //------------
+        //------------*/
+
+        /**
+         * Test permission
+         */
+        if (!Settings.System.canWrite(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+            intent.setData(Uri.parse("package:" + this.getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent); //CODE_WRITE_SETTINGS_PERMISSION
+        }
 
         /// BLUETOOTH
         /*

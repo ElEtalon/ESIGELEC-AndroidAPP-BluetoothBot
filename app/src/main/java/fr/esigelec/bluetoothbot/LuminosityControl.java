@@ -57,7 +57,7 @@ public class LuminosityControl {
         if(this.currentLuminosity + maxLum > 255){
             this.currentLuminosity = maxLum;
         }else{
-            this.currentLuminosity = newLum;
+            this.currentLuminosity += newLum;
         }
     }
 
@@ -79,11 +79,11 @@ public class LuminosityControl {
         this.setCurrentLuminosity(progress);
 
         // update system new luminosity
-        changeCurrentSystemLuminosity(resolver);
+        changeCurrentSystemLuminosity(resolver, progress);
     }
 
-    private void changeCurrentSystemLuminosity(ContentResolver resolver){
-        android.provider.Settings.System.putInt(resolver, android.provider.Settings.System.SCREEN_BRIGHTNESS, (int)this.currentLuminosity);
+    private void changeCurrentSystemLuminosity(ContentResolver resolver, int lux){
+        Settings.System.putInt(resolver, Settings.System.SCREEN_BRIGHTNESS, lux);
     }
 
     /**
@@ -96,7 +96,7 @@ public class LuminosityControl {
                 setCurrentLuminosity(event.values[0]);
 
                 // update system new luminosity
-                changeCurrentSystemLuminosity(resolver);
+                changeCurrentSystemLuminosity(resolver, (int) currentLuminosity);
             }
 
             @Override
