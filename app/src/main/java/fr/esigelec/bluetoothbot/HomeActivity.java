@@ -49,6 +49,10 @@ public class HomeActivity extends AppCompatActivity {
     private BluetoothSearch bluetoothSearch;
     private boolean bluetoothState;
 
+    private TextView textConnectivity;
+    private ConnectivityManager connectivityManager;
+    private Connectivity connectivity;
+
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
     private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();
 
@@ -57,30 +61,28 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        //Connectivity
-        /*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        TextView textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
-        textConnectivity.setText("OnCreate");
-        Connectivity connectivity = new Connectivity(textConnectivity, connectivityManager);
-        new RequeteHttp().execute(textConnectivity);
-        //------------*/
-
         /**
          * Test permission
          */
         if (!Settings.System.canWrite(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-            intent.setData(Uri.parse("package:" + this.getPackageName()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent); //CODE_WRITE_SETTINGS_PERMISSION
+            Utils.testPermission(this, Settings.ACTION_MANAGE_WRITE_SETTINGS);
         }
 
-        /// BLUETOOTH
         /*
-        * List of devices
+        * Connectivity
         */
-        // get the listview
-        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
+        // Instance connectivity Manager class
+        this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        // get text view
+        this.textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
+        this.textConnectivity.setText("OnCreate");
+
+        // Instance connectivity
+        this.connectivity = new Connectivity(textConnectivity, connectivityManager);
+
+        // execute request
+        new RequeteHttp().execute(this.textConnectivity);
 
         /*
         * Luminiosity utils
@@ -140,6 +142,9 @@ public class HomeActivity extends AppCompatActivity {
 
         // get bluetooth state
         this.bluetoothState = this.bluetoothAdapter.isEnabled();
+
+        // get the listview
+        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
 
         // set the switch off/on
         this.switchBluetooth.setChecked(this.bluetoothState);
