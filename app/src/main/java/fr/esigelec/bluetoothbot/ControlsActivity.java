@@ -21,6 +21,7 @@ public class ControlsActivity extends AppCompatActivity {
     private BluetoothConnection bluetoothConnection;
 
     private TextView deviceName;
+    private TextView console;
     private Switch switchMode;
     private Button goBottom;
     private Button goForward;
@@ -47,9 +48,11 @@ public class ControlsActivity extends AppCompatActivity {
         // bluetooth connection class
         this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice);
 
-        // get title to change
+        // get title to change & init console
         this.deviceName = (TextView) findViewById(R.id.deviceName);
+        this.console    = (TextView) findViewById(R.id.textViewConsole);
         this.deviceName.setText(this.bluetoothDevice.getName());
+        this.console.setText("> console started");
 
         // get buttons
         this.switchMode         = (Switch) findViewById(R.id.SwitchMode);
@@ -113,5 +116,13 @@ public class ControlsActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    /**
+     * Add string to the console
+     * @param toAdd
+     */
+    private void updateConsole(String toAdd){
+        this.console.append(toAdd);
     }
 }

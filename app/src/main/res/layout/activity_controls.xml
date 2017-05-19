@@ -26,20 +26,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </ScrollView>
+                android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/GoBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/GoForward"
-            android:layout_centerVertical="true"
-            android:onClick="onClick"
-            android:text="^"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="250dp"
-            tools:rotation="180" />
+                <TextView
+                    android:id="@+id/textViewConsole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Loading..." />
+            </LinearLayout>
+        </ScrollView>
 
         <Button
             android:id="@+id/GoForward"
@@ -143,18 +138,6 @@
             app:layout_constraintBottom_toTopOf="@+id/SwitchMode"
             tools:layout_editor_absoluteX="34dp" />
 
-        <Switch
-            android:id="@+id/SwitchMode"
-            android:layout_width="44dp"
-            android:layout_height="31dp"
-            android:layout_above="@+id/textViewConsole"
-            android:layout_alignStart="@+id/GoLeft"
-            android:layout_marginBottom="17dp"
-            android:onClick="onClick"
-            app:layout_constraintBottom_toTopOf="@+id/textViewAutomated"
-            tools:layout_editor_absoluteX="34dp"
-            tools:rotation="90" />
-
         <TextView
             android:id="@+id/deviceName"
             android:layout_width="wrap_content"
@@ -191,6 +174,23 @@
             tools:layout_editor_absoluteY="16dp"
             android:layout_alignParentTop="true"
             android:layout_alignStart="@+id/scrollView2" />
+
+        <Switch
+            android:id="@+id/SwitchMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="90"
+            android:layout_below="@+id/ButtonPlus"
+            android:layout_alignEnd="@+id/imageButton4" />
+
+        <Button
+            android:id="@+id/GoBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/GoForward"
+            android:layout_centerVertical="true"
+            android:rotation="180"
+            android:text="^" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
