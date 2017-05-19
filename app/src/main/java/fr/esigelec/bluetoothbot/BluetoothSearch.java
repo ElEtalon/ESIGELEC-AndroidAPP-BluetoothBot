@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,6 +26,31 @@ public class BluetoothSearch {
         this.bluetoothAdapter   = adapter;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
+    }
+
+    /**
+     * Turn on/off bluetooth
+     * @param
+     */
+    public void turnOnOffBluetooth(HomeActivity home, boolean mode) {
+        // on
+        if(mode){
+            if (!this.bluetoothAdapter.isEnabled()){
+                Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                home.startActivityForResult(turnOn, 0);
+                Toast.makeText(home.getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(home.getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
+            }
+            // off
+        }else{
+            if (this.bluetoothAdapter.isEnabled()){
+                this.bluetoothAdapter.disable();
+                Toast.makeText(home.getApplicationContext(), "Bluetooth turned off",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(home.getApplicationContext(), "Bluetooth already off", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     /**

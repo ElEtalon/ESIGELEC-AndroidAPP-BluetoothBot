@@ -174,6 +174,15 @@ public class HomeActivity extends AppCompatActivity {
 
 
         // Bluetooth listeners
+        // state listener
+        this.buttonBluetoothOnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bluetoothSearch.turnOnOffBluetooth(HomeActivity.this, buttonBluetoothOnOff.isChecked());
+            }
+        });
+
+
         // Switch listener
         switchBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,19 +280,5 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         this.listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceListExplained));
-    }
-
-    /**
-     * Turn on bluetooth
-     * @param
-     */
-    private void turnOnBluetooth() {
-        if (!this.bluetoothAdapter.isEnabled()) {
-            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(turnOn, 0);
-            //Toast.makeText(getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
-        } else {
-            //Toast.makeText(getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
-        }
     }
 }

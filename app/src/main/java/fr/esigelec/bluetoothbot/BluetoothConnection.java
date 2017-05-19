@@ -4,11 +4,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 
@@ -27,6 +25,7 @@ public class BluetoothConnection {
         this.bluetoothAdapter = adapter;
         this.bluetoothDevice = device;
     }
+
 
     /**
      * bluetoothStream
