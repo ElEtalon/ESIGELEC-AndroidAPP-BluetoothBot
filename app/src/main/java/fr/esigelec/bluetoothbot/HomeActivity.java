@@ -64,6 +64,9 @@ public class HomeActivity extends AppCompatActivity {
         // check box
         this.checkBoxAutoLux = (CheckBox) findViewById(R.id.checkBoxAutoLux);
 
+        // set auto mode false
+        this.checkBoxAutoLux.setChecked(false);
+
         // get sensor manager
         this.sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
@@ -106,30 +109,25 @@ public class HomeActivity extends AppCompatActivity {
         // turn on bluetooth
         //this.turnOnBluetooth();
 
-        // LISTENNERS
+        // Luminosity listeners
         // seekBar MODE luminosity
         this.seekBarLuminiosity.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
+                // void
             }
         });
 
-        // AUTO MODE sensor listener
-        SensorEventListener luminosityListener = new SensorEventListener() {
+        // luminosity Mode (auto(true) / manual(false))
+        this.checkBoxAutoLux.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSensorChanged(SensorEvent event) {
-                luminosityControl.setCurrentLuminosity(event.values[0]);
+            public void onClick(View v) {
+                luminosityControl.setLuminosityMode(checkBoxAutoLux.isChecked());
             }
+        });
 
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                // void
-            }
-        };
-        // register listener
-        this.luminosityControl.updateLuminosityOnListener(luminosityListener);
 
+        // Bluetooth listeners
         // Switch listener
         switchBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
