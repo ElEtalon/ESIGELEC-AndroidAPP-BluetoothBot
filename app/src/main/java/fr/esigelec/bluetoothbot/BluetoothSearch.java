@@ -18,6 +18,7 @@ import java.util.Set;
 public class BluetoothSearch {
 
     private BluetoothAdapter bluetoothAdapter;
+    private boolean bluetoothState;
 
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
@@ -26,6 +27,15 @@ public class BluetoothSearch {
         this.bluetoothAdapter   = adapter;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
+        this.bluetoothState     = this.bluetoothAdapter.isEnabled();
+    }
+
+    /**
+     * Get bluetooth state
+     * @return
+     */
+    public boolean getBluetoothState(){
+        return this.bluetoothState;
     }
 
     /**
@@ -36,8 +46,9 @@ public class BluetoothSearch {
         // on
         if(mode){
             if (!this.bluetoothAdapter.isEnabled()){
-                Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                home.startActivityForResult(turnOn, 0);
+                this.bluetoothAdapter.enable();
+                /*Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                home.startActivityForResult(turnOn, 0);*/
                 Toast.makeText(home.getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
             }else{
                 Toast.makeText(home.getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();

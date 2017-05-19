@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.content.ContentResolver;
 import android.hardware.Sensor;
@@ -91,6 +92,9 @@ public class HomeActivity extends AppCompatActivity {
         // check box
         this.checkBoxAutoLux = (CheckBox) findViewById(R.id.checkBoxAutoLux);
 
+        // check if phone has the sensor
+        this.checkBoxAutoLux.setEnabled(this.checkIFPhoneHasLightSensor());
+
         // set auto mode false
         this.checkBoxAutoLux.setChecked(false);
 
@@ -119,11 +123,17 @@ public class HomeActivity extends AppCompatActivity {
         // get the bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        // Create bluetoothSearch Class
+        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
+
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
 
-        // set the switch off
-        this.buttonBluetoothOnOff.setChecked(false);
+        // set the switch on/off
+        this.buttonBluetoothOnOff.setChecked(this.bluetoothSearch.getBluetoothState());
+
+        // if the phone has not bluetooth adapter
+        this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
 
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
@@ -134,14 +144,8 @@ public class HomeActivity extends AppCompatActivity {
         // set the switch off/on
         this.switchBluetooth.setChecked(this.bluetoothState);
 
-        // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
-
         // first display paired
         this.displayPairedDevices();
-
-        // turn on bluetooth
-        //this.turnOnBluetooth();
 
         // Luminosity listeners
         // seekBar MODE luminosity
@@ -169,6 +173,13 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 luminosityControl.setLuminosityMode(checkBoxAutoLux.isChecked(), getContentResolver());
+
+                // set / unset grey
+                if(checkBoxAutoLux.isChecked()){
+                    seekBarLuminiosity.setEnabled(false);
+                }else{
+                    seekBarLuminiosity.setEnabled(true);
+                }
             }
         });
 
@@ -281,4 +292,22 @@ public class HomeActivity extends AppCompatActivity {
 
         this.listViewDevices.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceListExplained));
     }
+
+    /**
+     * Check if the phone has a light sensor
+     * @return
+     */
+    private boolean checkIFPhoneHasLightSensor(){
+        PackageManager PM= this.getPackageManager();
+        return PM.hasSystemFeature(PackageManager.FEATURE_SENSOR_LIGHT);
+    }
+    /**
+     * Check if the phone has a bluetooth adapter
+     * @return
+     */
+    private boolean checkIFPhoneHasBluetoothAdapter(){
+        PackageManager PM= this.getPackageManager();
+        return PM.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+    }
+
 }
