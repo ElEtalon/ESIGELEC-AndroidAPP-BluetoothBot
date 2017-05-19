@@ -2,69 +2,141 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
 
     private ImageButton imgAboutButton;
-    private Switch switchButton;
     private ListView listViewDevices;
 
+    private CheckBox checkBoxAutoLux;
+    private SeekBar seekBarLuminiosity;
+    private LuminosityControl luminosityControl;
+    private SensorManager sensorManager;
+
+    private ToggleButton buttonBluetoothOnOff;
+    private Switch switchBluetooth;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSearch bluetoothSearch;
+    private boolean bluetoothState;
 
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
     private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        /// BLUETOOTH
+        /*
+        * List of devices
+        */
+        // get the listview
+        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
+
+        /*
+        * Luminiosity utils
+        */
+        // seekBar
+        this.seekBarLuminiosity = (SeekBar) findViewById(R.id.seekBarLuminiosity);
+
+        // check box
+        this.checkBoxAutoLux = (CheckBox) findViewById(R.id.checkBoxAutoLux);
+
+        // get sensor manager
+        this.sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+        // Create luminiosity control class
+        this.luminosityControl = new LuminosityControl(sensorManager);
+
+        /*
+        * About button
+        */
+        // About button
+        this.imgAboutButton =(ImageButton)findViewById(R.id.imageAboutButton);
+
+        /*
+        * Bluetooth utils
+        */
         // get the bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        // turn on bluetooth
-        this.turnOnBluetooth();
+        // turn on/off bluetooth
+        this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
+
+        // set the switch off
+        this.buttonBluetoothOnOff.setChecked(false);
+
+        // get the bluetooth switch (paired / discover)
+        this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
+
+        // get bluetooth state
+        this.bluetoothState = this.bluetoothAdapter.isEnabled();
+
+        // set the switch off/on
+        this.switchBluetooth.setChecked(this.bluetoothState);
 
         // Create bluetoothSearch Class
         this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
 
-        /// LIST VIEW
-        // get the list
-        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
         // first display paired
         this.displayPairedDevices();
 
-        /// Switch
-        // get the switch
-        switchButton = (Switch) findViewById(R.id.discover_paired);
-        // set the switch off
-        switchButton.setChecked(true);
+        // turn on bluetooth
+        //this.turnOnBluetooth();
+
+        // LISTENNERS
+        // seekBar MODE luminosity
+        this.seekBarLuminiosity.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+            }
+        });
+
+        // AUTO MODE sensor listener
+        SensorEventListener luminosityListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                luminosityControl.setCurrentLuminosity(event.values[0]);
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                // void
+            }
+        };
+        // register listener
+        this.luminosityControl.updateLuminosityOnListener(luminosityListener);
 
         // Switch listener
-        switchButton.setOnClickListener(new View.OnClickListener() {
+        switchBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 // Display paired devices
-                if (switchButton.isChecked()) {
+                if (switchBluetooth.isChecked()) {
                     Toast.makeText(getApplicationContext(), "Display paired devices", Toast.LENGTH_LONG).show();
                     displayPairedDevices();
 
@@ -104,7 +176,6 @@ public class HomeActivity extends AppCompatActivity {
 
         /// Image Button
         // On click logo --> about
-        this.imgAboutButton =(ImageButton)findViewById(R.id.imageAboutButton);
         this.imgAboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

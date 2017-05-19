@@ -26,8 +26,8 @@
 
         <ListView
             android:id="@+id/listViewDevices"
-            android:layout_width="380dp"
-            android:layout_height="350dp"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             tools:layout_editor_absoluteX="12dp"
@@ -86,6 +86,52 @@
             android:layout_marginEnd="28dp"
             android:layout_alignBottom="@+id/textView"
             android:layout_toStartOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/textViewBlueActivate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bluetooth"
+            android:layout_above="@+id/toggleBluetooth"
+            android:layout_toStartOf="@+id/textView13" />
+
+        <ToggleButton
+            android:id="@+id/toggleBluetooth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton"
+            android:layout_marginBottom="16dp"
+            android:layout_above="@+id/discover_paired"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="26dp" />
+
+        <SeekBar
+            android:id="@+id/seekBarLuminiosity"
+            style="@android:style/Widget.DeviceDefault.SeekBar"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewLux"
+            android:layout_marginEnd="14dp"
+            android:layout_toStartOf="@+id/checkBoxAutoLux" />
+
+        <TextView
+            android:id="@+id/textViewLux"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Luminiosity"
+            android:layout_above="@+id/checkBoxAutoLux"
+            android:layout_alignEnd="@+id/textView13"
+            android:layout_marginEnd="16dp" />
+
+        <CheckBox
+            android:id="@+id/checkBoxAutoLux"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto"
+            android:layout_alignBaseline="@+id/toggleBluetooth"
+            android:layout_alignBottom="@+id/toggleBluetooth"
+            android:layout_alignParentEnd="true" />
+
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
