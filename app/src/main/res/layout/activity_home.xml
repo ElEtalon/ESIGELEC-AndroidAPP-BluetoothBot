@@ -88,6 +88,14 @@
             android:layout_toStartOf="@+id/textView" />
 
         <TextView
+            android:id="@+id/TextConnectivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView13"
+            android:layout_alignTop="@+id/imageAboutButton"
+            android:text="Connect..." />
+      
+        <TextView
             android:id="@+id/textViewBlueActivate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -131,7 +139,6 @@
             android:layout_alignBaseline="@+id/toggleBluetooth"
             android:layout_alignBottom="@+id/toggleBluetooth"
             android:layout_alignParentEnd="true" />
-
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

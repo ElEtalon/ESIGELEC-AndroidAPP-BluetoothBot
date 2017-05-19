@@ -2,6 +2,10 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.content.ContentResolver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -19,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 import android.widget.ToggleButton;
@@ -50,6 +55,15 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        //Connectivity
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        TextView textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
+        textConnectivity.setText("OnCreate");
+        Connectivity connectivity = new Connectivity(textConnectivity, connectivityManager);
+        new RequeteHttp().execute(textConnectivity);
+        //------------
+
+        /// BLUETOOTH
         /*
         * List of devices
         */
@@ -90,6 +104,7 @@ public class HomeActivity extends AppCompatActivity {
         /*
         * Bluetooth utils
         */
+      
         // get the bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
