@@ -2,6 +2,7 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ContentResolver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -60,6 +61,7 @@ public class HomeActivity extends AppCompatActivity {
         */
         // seekBar
         this.seekBarLuminiosity = (SeekBar) findViewById(R.id.seekBarLuminiosity);
+        this.seekBarLuminiosity.setMax(255);
 
         // check box
         this.checkBoxAutoLux = (CheckBox) findViewById(R.id.checkBoxAutoLux);
@@ -72,6 +74,12 @@ public class HomeActivity extends AppCompatActivity {
 
         // Create luminiosity control class
         this.luminosityControl = new LuminosityControl(sensorManager);
+
+        // Set the current luminosity with the current screen luminosity
+        this.luminosityControl.updateCurrentLuminosityWithCurrentSystemLuminosity(getContentResolver());
+
+        // update seekBar progress
+        this.seekBarLuminiosity.setProgress((int)this.luminosityControl.getCurrentLuminosity());
 
         /*
         * About button
@@ -111,10 +119,22 @@ public class HomeActivity extends AppCompatActivity {
 
         // Luminosity listeners
         // seekBar MODE luminosity
-        this.seekBarLuminiosity.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+        this.seekBarLuminiosity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int luminosityProgress = 0;
+
             @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                // void
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                luminosityProgress = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                luminosityControl.setNewLuminosity(getContentResolver(), luminosityProgress);
             }
         });
 
@@ -122,7 +142,7 @@ public class HomeActivity extends AppCompatActivity {
         this.checkBoxAutoLux.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                luminosityControl.setLuminosityMode(checkBoxAutoLux.isChecked());
+                luminosityControl.setLuminosityMode(checkBoxAutoLux.isChecked(), getContentResolver());
             }
         });
 
@@ -183,6 +203,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+
 
     /**
      * Display paired bluetooth devices

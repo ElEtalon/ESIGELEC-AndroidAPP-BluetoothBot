@@ -1,9 +1,11 @@
 package fr.esigelec.bluetoothbot;
 
+import android.content.ContentResolver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.provider.Settings;
 
 import static android.hardware.SensorManager.*;
 
@@ -18,6 +20,8 @@ public class LuminosityControl {
     private float currentLuminosity;
     private SensorEventListener luminosityListener;
     private boolean luminosityMode;
+
+    private static int maxLum = 255;
 
     /**
      * Constructor
@@ -34,21 +38,65 @@ public class LuminosityControl {
     }
 
     /**
-     * Set new luminosity value
-     * @param newLuminosity
+     * Set the current luminosity with the current screen luminosity
+     * @param resolver
      */
-    public void setCurrentLuminosity(float newLuminosity){
-        this.currentLuminosity = newLuminosity;
+    public void updateCurrentLuminosityWithCurrentSystemLuminosity(ContentResolver resolver){
+        try {
+            this.currentLuminosity = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * set new luminosity
+     * @param newLum
+     */
+    public void setCurrentLuminosity(float newLum){
+        if(this.currentLuminosity + maxLum > 255){
+            this.currentLuminosity = maxLum;
+        }else{
+            this.currentLuminosity = newLum;
+        }
+    }
+
+    /**
+     * return current luminosity
+     * @return
+     */
+    public float getCurrentLuminosity(){
+        return this.currentLuminosity;
+    }
+
+    /**
+     * Set new luminosity value
+     * @param resolver
+     * @param progress
+     */
+    public void setNewLuminosity(ContentResolver resolver, int progress){
+        // update attribute
+        this.setCurrentLuminosity(progress);
+
+        // update system new luminosity
+        changeCurrentSystemLuminosity(resolver);
+    }
+
+    private void changeCurrentSystemLuminosity(ContentResolver resolver){
+        android.provider.Settings.System.putInt(resolver, android.provider.Settings.System.SCREEN_BRIGHTNESS, (int)this.currentLuminosity);
     }
 
     /**
      * Set Mode auto change luminosity on sensor change
      */
-    private void autoModeLuminosity(){
+    private void autoModeLuminosity(final ContentResolver resolver){
          this.luminosityListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
                 setCurrentLuminosity(event.values[0]);
+
+                // update system new luminosity
+                changeCurrentSystemLuminosity(resolver);
             }
 
             @Override
@@ -74,12 +122,13 @@ public class LuminosityControl {
      * change luminosity mode (manual / auto)
      * @param newMode
      */
-    public void setLuminosityMode(Boolean newMode){
+    public void setLuminosityMode(Boolean newMode, ContentResolver resolver){
         this.luminosityMode = newMode;
         if(this.luminosityMode){
-            this.autoModeLuminosity();
+            this.autoModeLuminosity(resolver);
         }else{
             this.stopAutoModeLuminosity();
         }
     }
+
 }
