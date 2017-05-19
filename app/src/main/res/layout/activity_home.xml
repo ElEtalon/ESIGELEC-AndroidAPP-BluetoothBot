@@ -136,6 +136,13 @@
             android:text="Auto"
             android:layout_alignTop="@+id/textViewBlueActivate"
             android:layout_toEndOf="@+id/discover_paired" />
+
+        <TextView
+            android:id="@+id/textViewLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView16"
+            android:layout_toEndOf="@+id/toggleBluetooth" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

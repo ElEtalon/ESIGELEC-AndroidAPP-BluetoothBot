@@ -124,7 +124,7 @@ public class BluetoothSearch {
                 String action = intent.getAction();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Notification
-                    //Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity.getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
                     Log.i("BluetoothSearch", "Device found");
 
                     // Create a new device item
@@ -135,6 +135,7 @@ public class BluetoothSearch {
                 }
 
                 if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
+                    Toast.makeText(activity.getApplicationContext(), "Discovery ended",Toast.LENGTH_LONG).show();
                     Log.i("BluetoothSearch", "Discovery ended");
                 }
             }

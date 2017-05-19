@@ -48,6 +48,7 @@ public class HomeActivity extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSearch bluetoothSearch;
     private boolean bluetoothState;
+    private TextView bluetoothDiscoveryLoading;
 
     private TextView textConnectivity;
     private ConnectivityManager connectivityManager;
@@ -136,6 +137,9 @@ public class HomeActivity extends AppCompatActivity {
 
         // if the phone has not bluetooth adapter
         this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
+
+        // get loading
+        this.bluetoothDiscoveryLoading = (TextView) findViewById(R.id.textViewLoading);
 
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
@@ -277,11 +281,17 @@ public class HomeActivity extends AppCompatActivity {
         // reset list
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
+        // update textview
+        this.bluetoothDiscoveryLoading.setText("Discovery...");
+
         // get list of bluetooth Devices
         this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
+
+        // update textview
+        this.bluetoothDiscoveryLoading.setText("Discovery end");
     }
 
     /**
