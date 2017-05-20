@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 /**
@@ -27,6 +28,7 @@ public class BluetoothConnectThread extends Thread {
         // Try to connect to the device
         try {
             tmp = device.createRfcommSocketToServiceRecord(BLUE_UUID);
+            //tmp = (BluetoothSocket) this.bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(this.bluetoothDevice,1);
         } catch (IOException e) {
             Log.e("BluetoothConnectThread", "connection failed", e);
         }

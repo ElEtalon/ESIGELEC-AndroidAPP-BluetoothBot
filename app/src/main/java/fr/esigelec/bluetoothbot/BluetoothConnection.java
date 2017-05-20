@@ -67,12 +67,23 @@ public class BluetoothConnection {
     }
 
     /**
+     * Return true if connected to the device
+     * @return
+     */
+    public boolean isConnected(){
+        if(this.bluetoothState == STATE_CONNECTED){
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Stop all bluetooth connection threads
      */
     public void stop() {
-        if (D) Log.d("BluetoothConnection", "stop");
+        Log.d("BluetoothConnection", "stop");
 
-        if (bluetoothConnectThread != null) {
+            if (bluetoothConnectThread != null) {
             this.bluetoothConnectThread.cancel();
             this.bluetoothConnectThread = null;
         }
@@ -112,18 +123,16 @@ public class BluetoothConnection {
 
     /**
      * Start the connected thread to manage exchanges
-     * @param socket
-     * @param device
      */
     public void bluetoothConnected(){
-        if (D) Log.d("BluetoothConnection", "connected");
+        Log.d("BluetoothConnection", "connected");
 
         // Cancel all threads
         this.stop();
 
         // Start the thread to manage the connection and perform transmissions
         this.bluetoothConnectedThread = new BluetoothConnectedThread(this.bluetoothSocket);
-        this.bluetoothConnectedThread.start();
+        this.bluetoothConnectedThread.connected();
 
         // set the state to connected
         this.setState(STATE_CONNECTED);
@@ -131,16 +140,15 @@ public class BluetoothConnection {
 
     /**
      * bluetoothConnect
-     * @param bluetoothDevice
      */
-    public void bluetoothConnect(BluetoothDevice bluetoothDevice){
-        if (D) Log.d("BluetoothConnection", "connect to: " + bluetoothDevice);
+    public void bluetoothConnect(){
+        Log.d("BluetoothConnection", "connect to: " + this.bluetoothDevice);
 
         // Cancel all threads
         this.stop();
 
         // Start the thread to connect with the given device
-        this.bluetoothConnectThread = new BluetoothConnectThread(bluetoothAdapter, bluetoothDevice);
+        this.bluetoothConnectThread = new BluetoothConnectThread(this.bluetoothAdapter, this.bluetoothDevice);
 
         // if connection is successful
         if(this.bluetoothConnectThread.tryConnection()){
