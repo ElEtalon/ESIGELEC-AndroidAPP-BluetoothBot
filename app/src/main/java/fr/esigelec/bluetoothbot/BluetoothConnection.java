@@ -7,9 +7,8 @@ import android.util.Log;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
-
+//inspirate from https://github.com/luugiathuy/Remote-Bluetooth-Android/blob/master/RemoteBluetooth/src/com/luugiathuy/apps/remotebluetooth/BluetoothCommandService.java
 public class BluetoothConnection {
 
     private BluetoothAdapter bluetoothAdapter;
@@ -19,58 +18,122 @@ public class BluetoothConnection {
     private InputStream bTInputStream;
     private OutputStream bTOutputStream;
 
-    private static final UUID BLUE_UUID = UUID.fromString("00030000-0000-1000-8000-00805F9B34FB");
+    private BluetoothConnectThread bluetoothConnectThread;
+    private BluetoothConnectedThread bluetoothConnectedThread;
+    private int bluetoothState;
 
+    // Constants that indicate the current connection state
+    public static final int STATE_NONE = 0;       // we're doing nothing
+    public static final int STATE_LISTEN = 1;     // now listening for incoming connections
+    public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
+    public static final int STATE_CONNECTED = 3;  // now connected to a remote device
+
+    // Constants that indicate command to the robot
+    public static final int EXIT_CMD = -1;
+    public static final int GO_UP = 1;
+    public static final int GO_DOWN = 2;
+    public static final int GO_RIGHT = 3;
+    public static final int GO_LEFT = 4;
+    public static final int STOP = 5;
+    public static final int SPEED_UP = 6;
+    public static final int SPEED_DOWN = 7;
+    public static final int MANUAL_MODE = 8;
+    public static final int AUTO_MODE = 9;
+
+    /**
+     * Constructor
+     * @param adapter
+     * @param device
+     */
     public BluetoothConnection(BluetoothAdapter adapter, BluetoothDevice device){
         this.bluetoothAdapter = adapter;
         this.bluetoothDevice = device;
+        this.bluetoothState = STATE_NONE;
     }
 
+    /**
+     * Set new state
+     * @param state
+     */
+    private void setState(int state){
+        this.bluetoothState = state;
+    }
 
     /**
-     * bluetoothStream
-     * @param bluetoothDevice
+     * Return the current connection state
      */
-    private void bluetoothStream(BluetoothDevice bluetoothDevice){
-        this.bTInputStream   = null;
-        this.bTOutputStream  = null;
-        try {
-            this.bTOutputStream = this.bluetoothSocket.getOutputStream();
-            this.bTInputStream  = this.bluetoothSocket.getInputStream();
-        } catch (Exception e) {
-            //Toast.makeText(getApplicationContext(), "Error when opening the bluetooth stream " + e, Toast.LENGTH_LONG).show();
-            Log.e("BluetoothConnection", "Error when opening the bluetooth stream " + e);
+    public int getState() {
+        return this.bluetoothState;
+    }
+
+    /**
+     * Stop all bluetooth connection threads
+     */
+    public void stop() {
+        if (D) Log.d("BluetoothConnection", "stop");
+
+        if (bluetoothConnectThread != null) {
+            bluetoothConnectThread.cancel();
+            bluetoothConnectThread = null;
         }
+        if (bluetoothConnectedThread != null) {
+            bluetoothConnectedThread.cancel();
+            bluetoothConnectedThread = null;
+        }
+
+        setState(STATE_NONE);
+    }
+
+    /**
+     * Called when connection failed
+     * TODO : add toast into homeactivity
+     */
+    private void connectionFailed() {
+        setState(STATE_LISTEN);
+    }
+
+    /**
+     * Called when connection is lost
+     * TODO : go back to homeActivity
+     */
+    private void connectionLost(){
+        setState(STATE_LISTEN);
+    }
+
+    /**
+     * Start the connected thread to manage exchanges
+     * @param socket
+     * @param device
+     */
+    public void bluetoothConnected(BluetoothSocket socket, BluetoothDevice device){
+        if (D) Log.d("BluetoothConnection", "connected");
+
+        // Cancel all threads
+        this.stop();
+
+        // Start the thread to manage the connection and perform transmissions
+        bluetoothConnectedThread = new BluetoothConnectedThread(bluetoothSocket);
+        bluetoothConnectedThread.start();
+
+        // set the state to connected
+        setState(STATE_CONNECTED);
     }
 
     /**
      * bluetoothConnect
      * @param bluetoothDevice
-     * @return
      */
-    public boolean bluetoothConnect(BluetoothDevice bluetoothDevice){
-        if (this.bluetoothAdapter.isDiscovering()) {
-            this.bluetoothAdapter.cancelDiscovery();
-        }
+    public void bluetoothConnect(BluetoothDevice bluetoothDevice){
+        if (D) Log.d("BluetoothConnection", "connect to: " + bluetoothDevice);
 
-        this.bluetoothSocket = null;
+        // Cancel all threads
+        this.stop();
 
-        try {
-            this.bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
-            this.bluetoothSocket.connect();
-        } catch (Exception e){
-            //Toast.makeText(getApplicationContext(), "Error when create connection socket " + e,Toast.LENGTH_LONG).show();
-            Log.e("BluetoothConnection", "Error when create connection socket " + e);
-            //Toast.makeText(getApplicationContext(), "Try to connect...", Toast.LENGTH_LONG).show();
-            Log.i("BluetoothConnection", "Try to connect by fallback...");
-            try {
-                this.bluetoothSocket =(BluetoothSocket) bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(bluetoothDevice,1);
-                this.bluetoothSocket.connect();
-            } catch (Exception e1) {
-                Log.e("BluetoothConnection", "Error when closing the socket " + e1);
-                //Toast.makeText(getApplicationContext(), "Error when closing the socket " + e, Toast.LENGTH_LONG).show();
-            }
-        }
-        return false;
+        // Start the thread to connect with the given device
+        bluetoothConnectThread = new BluetoothConnectThread(bluetoothDevice);
+        bluetoothConnectThread.start();
+
+        // set state to connection
+        setState(STATE_CONNECTING);
     }
 }

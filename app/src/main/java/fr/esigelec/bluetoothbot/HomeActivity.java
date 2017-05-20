@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -48,7 +49,7 @@ public class HomeActivity extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSearch bluetoothSearch;
     private boolean bluetoothState;
-    private TextView bluetoothDiscoveryLoading;
+    private ProgressBar progressBarDiscovery;
 
     private TextView textConnectivity;
     private ConnectivityManager connectivityManager;
@@ -139,7 +140,8 @@ public class HomeActivity extends AppCompatActivity {
         this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
 
         // get loading
-        this.bluetoothDiscoveryLoading = (TextView) findViewById(R.id.textViewLoading);
+        this.progressBarDiscovery = (ProgressBar) findViewById(R.id.progressBarDiscovery);
+        this.progressBarDiscovery.setProgress(0);
 
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
@@ -282,7 +284,7 @@ public class HomeActivity extends AppCompatActivity {
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
         // update textview
-        this.bluetoothDiscoveryLoading.setText("Discovery...");
+        //this.bluetoothDiscoveryLoading.setText("Discovery...");
 
         // get list of bluetooth Devices
         this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
@@ -291,7 +293,7 @@ public class HomeActivity extends AppCompatActivity {
         this.listViewUpdate(this.discoveredDevices);
 
         // update textview
-        this.bluetoothDiscoveryLoading.setText("Discovery end");
+        //this.bluetoothDiscoveryLoading.setText("Discovery end");
     }
 
     /**
@@ -325,4 +327,9 @@ public class HomeActivity extends AppCompatActivity {
         return PM.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
     }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        this.bluetoothSearch.onDestroy();
+    }
 }
