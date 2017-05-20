@@ -76,7 +76,7 @@ public class BluetoothConnectThread extends Thread {
         try {
             this.bluetoothSocket.close();
         } catch (IOException e) {
-            Log.e("BluetoothConnectThread", "Connection canceled", e);
+            Log.e("BluetoothConnectThread", "Connection cancel failed", e);
         }
     }
 }

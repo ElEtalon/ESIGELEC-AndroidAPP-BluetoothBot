@@ -1,7 +1,9 @@
 package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -10,83 +12,83 @@ import java.io.OutputStream;
  */
 
 public class BluetoothConnectedThread extends Thread {
-    private final BluetoothSocket mmSocket;
-    private final InputStream mmInStream;
-    private final OutputStream mmOutStream;
+    private final BluetoothSocket bluetoothSocket;
+    private final InputStream bluetoothInStream;
+    private final OutputStream bluetoothOutStream;
 
     public BluetoothConnectedThread(BluetoothSocket socket) {
-        Log.d(TAG, "create ConnectedThread");
-        mmSocket = socket;
+        Log.d("ConnectedThread", "Connected Thread created");
+        this.bluetoothSocket = socket;
+
+        // create temp variable for trying
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        // Get the BluetoothSocket input and output streams
+        // Try to create input and output stream
         try {
-            tmpIn = socket.getInputStream();
-            tmpOut = socket.getOutputStream();
+            tmpIn = this.bluetoothSocket.getInputStream();
+            tmpOut = this.bluetoothSocket.getOutputStream();
         } catch (IOException e) {
-            Log.e(TAG, "temp sockets not created", e);
+            Log.e("ConnectedThread", "Error when creating streams", e);
         }
 
-        mmInStream = tmpIn;
-        mmOutStream = tmpOut;
+        // assign final value to streams
+        this.bluetoothInStream = tmpIn;
+        this.bluetoothOutStream = tmpOut;
     }
 
-    public void run() {
-        Log.i(TAG, "BEGIN mConnectedThread");
+    /**
+     * Manage bluetooth exchanges between the phone and the robot
+     */
+    public void connected() {
+        Log.i("ConnectedThread", "begin Connected Thread");
         byte[] buffer = new byte[1024];
 
         // Keep listening to the InputStream while connected
         while (true) {
             try {
                 // Read from the InputStream
-                int bytes = mmInStream.read(buffer);
-
-                // Send the obtained bytes to the UI Activity
-                mHandler.obtainMessage(RemoteBluetooth.MESSAGE_READ, bytes, -1, buffer)
-                        .sendToTarget();
+                int bytes = this.bluetoothInStream.read(buffer);
             } catch (IOException e) {
-                Log.e(TAG, "disconnected", e);
-                connectionLost();
+                Log.e("ConnectedThread", "Disconnected", e);
                 break;
             }
         }
     }
 
     /**
-     * Write to the connected OutStream.
-     * @param buffer  The bytes to write
+     * Send bytes
+     * @param buffer
      */
-    public void write(byte[] buffer) {
+    public void writeByte(byte[] buffer) {
         try {
-            mmOutStream.write(buffer);
-
-            // Share the sent message back to the UI Activity
-//                mHandler.obtainMessage(BluetoothChat.MESSAGE_WRITE, -1, -1, buffer)
-//                        .sendToTarget();
+            this.bluetoothOutStream.write(buffer);
         } catch (IOException e) {
-            Log.e(TAG, "Exception during write", e);
+            Log.e("ConnectedThread", "Error when writing bytes", e);
         }
     }
 
-    public void write(int out) {
+    /**
+     * Send command to the robot
+     * @param out
+     */
+    public void sendCommand(int command) {
         try {
-            mmOutStream.write(out);
-
-            // Share the sent message back to the UI Activity
-//                mHandler.obtainMessage(BluetoothChat.MESSAGE_WRITE, -1, -1, buffer)
-//                        .sendToTarget();
+            this.bluetoothOutStream.write(command);
         } catch (IOException e) {
-            Log.e(TAG, "Exception during write", e);
+            Log.e("ConnectedThread", "Error when sending command", e);
         }
     }
 
+    /**
+     * Cancel connection
+     */
     public void cancel() {
         try {
-            mmOutStream.write(EXIT_CMD);
-            mmSocket.close();
+            this.bluetoothOutStream.write(-1); //EXIT_CMD
+            this.bluetoothSocket.close();
         } catch (IOException e) {
-            Log.e(TAG, "close() of connect socket failed", e);
+            Log.e("ConnectedThread", "Connection cancel failed", e);
         }
     }
 }
