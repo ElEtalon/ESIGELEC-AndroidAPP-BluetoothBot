@@ -73,15 +73,15 @@ public class BluetoothConnection {
         if (D) Log.d("BluetoothConnection", "stop");
 
         if (bluetoothConnectThread != null) {
-            bluetoothConnectThread.cancel();
-            bluetoothConnectThread = null;
+            this.bluetoothConnectThread.cancel();
+            this.bluetoothConnectThread = null;
         }
         if (bluetoothConnectedThread != null) {
-            bluetoothConnectedThread.cancel();
-            bluetoothConnectedThread = null;
+            this.bluetoothConnectedThread.cancel();
+            this.bluetoothConnectedThread = null;
         }
 
-        setState(STATE_NONE);
+        this.setState(STATE_NONE);
     }
 
     /**
@@ -89,7 +89,8 @@ public class BluetoothConnection {
      * TODO : add toast into homeactivity
      */
     private void connectionFailed() {
-        setState(STATE_LISTEN);
+        this.stop();
+        this.setState(STATE_LISTEN);
     }
 
     /**
@@ -97,7 +98,16 @@ public class BluetoothConnection {
      * TODO : go back to homeActivity
      */
     private void connectionLost(){
-        setState(STATE_LISTEN);
+        this.stop();
+        this.setState(STATE_LISTEN);
+    }
+
+    /**
+     * Called when connection is successful
+     */
+    private void connectionSuccessful(){
+        // reset the connect thread
+        this.bluetoothConnectThread = null;
     }
 
     /**
@@ -105,18 +115,18 @@ public class BluetoothConnection {
      * @param socket
      * @param device
      */
-    public void bluetoothConnected(BluetoothSocket socket, BluetoothDevice device){
+    public void bluetoothConnected(){
         if (D) Log.d("BluetoothConnection", "connected");
 
         // Cancel all threads
         this.stop();
 
         // Start the thread to manage the connection and perform transmissions
-        bluetoothConnectedThread = new BluetoothConnectedThread(bluetoothSocket);
-        bluetoothConnectedThread.start();
+        this.bluetoothConnectedThread = new BluetoothConnectedThread(this.bluetoothSocket);
+        this.bluetoothConnectedThread.start();
 
         // set the state to connected
-        setState(STATE_CONNECTED);
+        this.setState(STATE_CONNECTED);
     }
 
     /**
@@ -130,10 +140,21 @@ public class BluetoothConnection {
         this.stop();
 
         // Start the thread to connect with the given device
-        bluetoothConnectThread = new BluetoothConnectThread(bluetoothDevice);
-        bluetoothConnectThread.start();
+        this.bluetoothConnectThread = new BluetoothConnectThread(bluetoothAdapter, bluetoothDevice);
 
-        // set state to connection
-        setState(STATE_CONNECTING);
+        // if connection is successful
+        if(this.bluetoothConnectThread.tryConnection()){
+            // set state to connection
+            this.setState(STATE_CONNECTING);
+
+            // reset the thread
+            this.connectionSuccessful();
+
+            // Start the connected thread
+            this.bluetoothConnected();
+        }else{
+            // return to listenning mode
+            this.connectionFailed();
+        }
     }
 }
