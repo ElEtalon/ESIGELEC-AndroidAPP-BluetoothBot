@@ -24,21 +24,24 @@ public class RequeteHttp extends AsyncTask<TextView, Void, String> {
 
     @Override
     protected void onPostExecute(String result){
-        textConnectivity.setText(result);
+        //textConnectivity.setText(result);
     }
 
     public String executerRequete() {
         HttpURLConnection urlConnection = null;
         String webcontent = null;
+
         try{
             URL url = new URL("http://ip-api.com/json/192.52.189.194");
             urlConnection = (HttpURLConnection) url.openConnection();
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
             webcontent = generateString(in);
             Log.d("TP", webcontent);
+            Log.d("RequeteHttp", "Success to get the webcontent");
         }
         catch(IOException e){
             e.printStackTrace();
+            Log.e("RequeteHttp", "Error when attempt to 'openconnect'", e);
         }
         finally{
             if(urlConnection != null)
