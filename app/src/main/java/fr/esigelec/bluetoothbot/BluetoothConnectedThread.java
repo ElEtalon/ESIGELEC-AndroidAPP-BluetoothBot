@@ -28,7 +28,7 @@ public class BluetoothConnectedThread extends Thread {
         try {
             tmpIn = this.bluetoothSocket.getInputStream();
             tmpOut = this.bluetoothSocket.getOutputStream();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e("ConnectedThread", "Error when creating streams", e);
         }
 
@@ -40,7 +40,7 @@ public class BluetoothConnectedThread extends Thread {
     /**
      * Manage bluetooth exchanges between the phone and the robot
      */
-    public void connected() {
+    public void run() {
         Log.i("ConnectedThread", "begin Connected Thread");
         byte[] buffer = new byte[1024];
 
@@ -49,7 +49,8 @@ public class BluetoothConnectedThread extends Thread {
             try {
                 // Read from the InputStream
                 int bytes = this.bluetoothInStream.read(buffer);
-            } catch (IOException e) {
+
+            }catch (Exception e) {
                 Log.e("ConnectedThread", "Disconnected", e);
                 break;
             }
@@ -63,7 +64,7 @@ public class BluetoothConnectedThread extends Thread {
     public void writeByte(byte[] buffer) {
         try {
             this.bluetoothOutStream.write(buffer);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e("ConnectedThread", "Error when writing bytes", e);
         }
     }

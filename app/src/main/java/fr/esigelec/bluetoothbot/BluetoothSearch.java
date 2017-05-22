@@ -22,16 +22,18 @@ public class BluetoothSearch {
     private BluetoothAdapter bluetoothAdapter;
     private boolean bluetoothState;
     private Activity activity;
+    private BluetoothCallback bluetoothCallback;
 
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
 
-    public BluetoothSearch(BluetoothAdapter adapter, Activity activity){
+    public BluetoothSearch(BluetoothAdapter adapter, Activity activity, BluetoothCallback callback){
         this.bluetoothAdapter   = adapter;
         this.activity           = activity;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
         this.bluetoothState     = this.bluetoothAdapter.isEnabled();
+        this.bluetoothCallback  = callback;
         this.stopDiscovery();
     }
 

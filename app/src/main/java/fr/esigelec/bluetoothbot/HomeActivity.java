@@ -2,20 +2,10 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.content.ContentResolver;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
-import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -34,7 +24,7 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity  implements BluetoothCallback{
 
     private ImageButton imgAboutButton;
     private ListView listViewDevices;
@@ -128,7 +118,7 @@ public class HomeActivity extends AppCompatActivity {
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this);
+        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this, this);
 
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
@@ -225,6 +215,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // On click list
         this.listViewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
                 final BluetoothDevice selected = pairedDevices.get((int)id);
@@ -234,18 +225,7 @@ public class HomeActivity extends AppCompatActivity {
                 // try to connect
                 Thread tryConnection = new Thread() {
                     public void run() {
-                        // bluetooth connection class
-                        BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, selected);
-
-                        // try to connect
-                        bluetoothConnection.bluetoothConnect();
-
-                        // if connected
-                        if(bluetoothConnection.isConnected()) {
-                            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
-                            controlsPage.putExtra("BluetoothDevice", selected);
-                            startActivity(controlsPage);
-                        }
+                        tryConnect(selected);
                     }
                 };
                 tryConnection.start();
@@ -264,6 +244,24 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Try to connect to the selected device
+     * @param device
+     */
+    private void tryConnect(BluetoothDevice device){
+        // bluetooth connection class
+        BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, device, this);
+
+        // try to connect
+        bluetoothConnection.bluetoothConnect();
+
+        /*// if connected
+        if(bluetoothConnection.isConnected()) {
+            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
+            controlsPage.putExtra("BluetoothDevice", selected);
+            startActivity(controlsPage);
+        }*/
+    }
 
     /**
      * Display paired bluetooth devices
@@ -334,5 +332,48 @@ public class HomeActivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         this.bluetoothSearch.onDestroy();
+    }
+
+    @Override
+    public void onBluetoothDiscoveryFound(BluetoothDevice device) {
+
+    }
+
+    @Override
+    public void onBluetoothOff() {
+
+    }
+
+    @Override
+    public void onBluetoothTurningOn() {
+
+    }
+
+    @Override
+    public void onBluetoothOn() {
+
+    }
+
+    @Override
+    public void onBluetoothTurningOff() {
+
+    }
+
+    @Override
+    public void onBluetoothConnection(int returnCode) {
+        if(returnCode == Constants.getInstance().BLUETOOTH_CONNECTED){
+            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
+            startActivity(controlsPage);
+        }
+    }
+
+    @Override
+    public void onReceiveData(String data) {
+
+    }
+
+    @Override
+    public void onBluetoothDiscovery(int returnCode) {
+
     }
 }

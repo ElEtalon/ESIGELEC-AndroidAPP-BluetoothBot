@@ -8,9 +8,9 @@ import android.util.Log;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-//inspirate from https://github.com/luugiathuy/Remote-Bluetooth-Android/blob/master/RemoteBluetooth/src/com/luugiathuy/apps/remotebluetooth/BluetoothCommandService.java
 public class BluetoothConnection {
 
+    private final BluetoothCallback bluetoothCallback;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bluetoothSocket;
     private BluetoothDevice bluetoothDevice;
@@ -22,33 +22,16 @@ public class BluetoothConnection {
     private BluetoothConnectedThread bluetoothConnectedThread;
     private int bluetoothState;
 
-    // Constants that indicate the current connection state
-    public static final int STATE_NONE = 0;       // we're doing nothing
-    public static final int STATE_LISTEN = 1;     // now listening for incoming connections
-    public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
-    public static final int STATE_CONNECTED = 3;  // now connected to a remote device
-
-    // Constants that indicate command to the robot
-    public static final int EXIT_CMD = -1;
-    public static final int GO_UP = 1;
-    public static final int GO_DOWN = 2;
-    public static final int GO_RIGHT = 3;
-    public static final int GO_LEFT = 4;
-    public static final int STOP = 5;
-    public static final int SPEED_UP = 6;
-    public static final int SPEED_DOWN = 7;
-    public static final int MANUAL_MODE = 8;
-    public static final int AUTO_MODE = 9;
-
     /**
      * Constructor
      * @param adapter
      * @param device
      */
-    public BluetoothConnection(BluetoothAdapter adapter, BluetoothDevice device){
+    public BluetoothConnection(BluetoothAdapter adapter, BluetoothDevice device, BluetoothCallback callback){
         this.bluetoothAdapter = adapter;
         this.bluetoothDevice = device;
-        this.bluetoothState = STATE_NONE;
+        this.bluetoothState = Constants.STATE_NONE;
+        this.bluetoothCallback  = callback;
     }
 
     /**
@@ -56,6 +39,11 @@ public class BluetoothConnection {
      * @param state
      */
     private void setState(int state){
+        switch(state){
+            case Constants.BLUETOOTH_CONNECTED:
+                this.bluetoothCallback.onBluetoothConnection(Constants.BLUETOOTH_CONNECTED);
+
+        }
         this.bluetoothState = state;
     }
 
@@ -71,10 +59,7 @@ public class BluetoothConnection {
      * @return
      */
     public boolean isConnected(){
-        if(this.bluetoothState == STATE_CONNECTED){
-            return true;
-        }
-        return false;
+        return this.bluetoothState == Constants.getInstance().BLUETOOTH_CONNECTED;
     }
 
     /**
@@ -92,7 +77,7 @@ public class BluetoothConnection {
             this.bluetoothConnectedThread = null;
         }
 
-        this.setState(STATE_NONE);
+        this.setState(Constants.getInstance().STATE_NONE);
     }
 
     /**
@@ -101,7 +86,7 @@ public class BluetoothConnection {
      */
     private void connectionFailed() {
         this.stop();
-        this.setState(STATE_LISTEN);
+        this.setState(Constants.getInstance().BLUETOOTH_CONNECTABLE);
     }
 
     /**
@@ -110,13 +95,22 @@ public class BluetoothConnection {
      */
     private void connectionLost(){
         this.stop();
-        this.setState(STATE_LISTEN);
+        this.setState(Constants.getInstance().BLUETOOTH_CONNECTABLE);
     }
 
     /**
      * Called when connection is successful
      */
     private void connectionSuccessful(){
+        // set device in data model
+        DataModel.getInstance().connectedDevice = this.bluetoothDevice;
+
+        // get connected socket
+        this.bluetoothSocket = this.bluetoothConnectThread.getSocket();
+
+        // set state to connection
+        this.setState(Constants.getInstance().BLUETOOTH_CONNECTED);
+
         // reset the connect thread
         this.bluetoothConnectThread = null;
     }
@@ -132,10 +126,10 @@ public class BluetoothConnection {
 
         // Start the thread to manage the connection and perform transmissions
         this.bluetoothConnectedThread = new BluetoothConnectedThread(this.bluetoothSocket);
-        this.bluetoothConnectedThread.connected();
+        this.bluetoothConnectedThread.run();
 
         // set the state to connected
-        this.setState(STATE_CONNECTED);
+        this.setState(Constants.getInstance().BLUETOOTH_CONNECTED_ERROR);
     }
 
     /**
@@ -151,11 +145,10 @@ public class BluetoothConnection {
         this.bluetoothConnectThread = new BluetoothConnectThread(this.bluetoothAdapter, this.bluetoothDevice);
 
         // if connection is successful
-        if(this.bluetoothConnectThread.tryConnection()){
-            // set state to connection
-            this.setState(STATE_CONNECTING);
+        this.bluetoothConnectThread.run();
 
-            // reset the thread
+        if(this.bluetoothConnectThread.getConnected()){
+             // reset the thread
             this.connectionSuccessful();
 
             // Start the connected thread

@@ -13,7 +13,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ControlsActivity extends AppCompatActivity {
+public class ControlsActivity extends AppCompatActivity implements BluetoothCallback{
 
     // Bluetooth var
     private BluetoothDevice bluetoothDevice;
@@ -36,17 +36,14 @@ public class ControlsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controls);
 
-        // get the device name from previous activity
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            this.bluetoothDevice = (BluetoothDevice) extras.get("BluetoothDevice");
-        }
+        // get the device name
+        this.bluetoothDevice = (BluetoothDevice) DataModel.getInstance().connectedDevice;
 
         // bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // bluetooth connection class
-        this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice);
+        this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice, this);
 
         // get title to change & init console
         this.deviceName = (TextView) findViewById(R.id.deviceName);
@@ -124,5 +121,46 @@ public class ControlsActivity extends AppCompatActivity {
      */
     private void updateConsole(String toAdd){
         this.console.append(toAdd);
+    }
+
+
+    @Override
+    public void onBluetoothOff() {
+
+    }
+
+    @Override
+    public void onBluetoothTurningOn() {
+
+    }
+
+    @Override
+    public void onBluetoothOn() {
+
+    }
+
+    @Override
+    public void onBluetoothTurningOff() {
+
+    }
+
+    @Override
+    public void onBluetoothConnection(int returnCode) {
+
+    }
+
+    @Override
+    public void onReceiveData(String data) {
+        // update console
+    }
+
+    @Override
+    public void onBluetoothDiscovery(int returnCode) {
+
+    }
+
+    @Override
+    public void onBluetoothDiscoveryFound(BluetoothDevice device) {
+
     }
 }
