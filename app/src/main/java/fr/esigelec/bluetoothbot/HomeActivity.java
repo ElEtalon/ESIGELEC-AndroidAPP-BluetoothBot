@@ -5,13 +5,16 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.content.ContentResolver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -45,30 +49,42 @@ public class HomeActivity extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSearch bluetoothSearch;
     private boolean bluetoothState;
+    private ProgressBar progressBarDiscovery;
+
+    private TextView textConnectivity;
+    private ConnectivityManager connectivityManager;
+    private Connectivity connectivity;
 
     private ArrayList<BluetoothDevice> discoveredDevices    = new ArrayList<BluetoothDevice>();
     private ArrayList<BluetoothDevice> pairedDevices        = new ArrayList<BluetoothDevice>();
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        //Connectivity
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        TextView textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
-        textConnectivity.setText("OnCreate");
-        Connectivity connectivity = new Connectivity(textConnectivity, connectivityManager);
-        new RequeteHttp().execute(textConnectivity);
-        //------------
+        /**
+         * Test permission
+         */
+        if (!Settings.System.canWrite(this)) {
+            Utils.testPermission(this, Settings.ACTION_MANAGE_WRITE_SETTINGS);
+        }
 
-        /// BLUETOOTH
         /*
-        * List of devices
+        * Connectivity
         */
-        // get the listview
-        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
+        // Instance connectivity Manager class
+        /*this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        // get text view
+        this.textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
+        this.textConnectivity.setText("OnCreate");
+
+        // Instance connectivity
+        this.connectivity = new Connectivity(textConnectivity, connectivityManager);
+
+        // execute request
+        new RequeteHttp().execute(this.textConnectivity);*/
 
         /*
         * Luminiosity utils
@@ -79,6 +95,9 @@ public class HomeActivity extends AppCompatActivity {
 
         // check box
         this.checkBoxAutoLux = (CheckBox) findViewById(R.id.checkBoxAutoLux);
+
+        // check if phone has the sensor
+        this.checkBoxAutoLux.setEnabled(this.checkIFPhoneHasLightSensor());
 
         // set auto mode false
         this.checkBoxAutoLux.setChecked(false);
@@ -108,11 +127,21 @@ public class HomeActivity extends AppCompatActivity {
         // get the bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        // Create bluetoothSearch Class
+        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this);
+
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
 
-        // set the switch off
-        this.buttonBluetoothOnOff.setChecked(false);
+        // set the switch on/off
+        this.buttonBluetoothOnOff.setChecked(this.bluetoothSearch.getBluetoothState());
+
+        // if the phone has not bluetooth adapter
+        this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
+
+        // get loading
+        this.progressBarDiscovery = (ProgressBar) findViewById(R.id.progressBarDiscovery);
+        this.progressBarDiscovery.setProgress(0);
 
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
@@ -120,17 +149,14 @@ public class HomeActivity extends AppCompatActivity {
         // get bluetooth state
         this.bluetoothState = this.bluetoothAdapter.isEnabled();
 
+        // get the listview
+        this.listViewDevices =(ListView)findViewById(R.id.listViewDevices);
+
         // set the switch off/on
         this.switchBluetooth.setChecked(this.bluetoothState);
 
-        // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter);
-
         // first display paired
         this.displayPairedDevices();
-
-        // turn on bluetooth
-        //this.turnOnBluetooth();
 
         // Luminosity listeners
         // seekBar MODE luminosity
@@ -158,11 +184,27 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 luminosityControl.setLuminosityMode(checkBoxAutoLux.isChecked(), getContentResolver());
+
+                // set / unset grey
+                if(checkBoxAutoLux.isChecked()){
+                    seekBarLuminiosity.setEnabled(false);
+                }else{
+                    seekBarLuminiosity.setEnabled(true);
+                }
             }
         });
 
 
         // Bluetooth listeners
+        // state listener
+        this.buttonBluetoothOnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bluetoothSearch.turnOnOffBluetooth(HomeActivity.this, buttonBluetoothOnOff.isChecked());
+            }
+        });
+
+
         // Switch listener
         switchBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -195,8 +237,11 @@ public class HomeActivity extends AppCompatActivity {
                         // bluetooth connection class
                         BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, selected);
 
+                        // try to connect
+                        bluetoothConnection.bluetoothConnect();
+
                         // if connected
-                        if(!bluetoothConnection.bluetoothConnect(selected)) {
+                        if(bluetoothConnection.isConnected()) {
                             Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
                             controlsPage.putExtra("BluetoothDevice", selected);
                             startActivity(controlsPage);
@@ -241,11 +286,17 @@ public class HomeActivity extends AppCompatActivity {
         // reset list
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
+        // update textview
+        //this.bluetoothDiscoveryLoading.setText("Discovery...");
+
         // get list of bluetooth Devices
         this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
+
+        // update textview
+        //this.bluetoothDiscoveryLoading.setText("Discovery end");
     }
 
     /**
@@ -263,16 +314,25 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
-     * Turn on bluetooth
-     * @param
+     * Check if the phone has a light sensor
+     * @return
      */
-    private void turnOnBluetooth() {
-        if (!this.bluetoothAdapter.isEnabled()) {
-            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(turnOn, 0);
-            //Toast.makeText(getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
-        } else {
-            //Toast.makeText(getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
-        }
+    private boolean checkIFPhoneHasLightSensor(){
+        PackageManager PM= this.getPackageManager();
+        return PM.hasSystemFeature(PackageManager.FEATURE_SENSOR_LIGHT);
+    }
+    /**
+     * Check if the phone has a bluetooth adapter
+     * @return
+     */
+    private boolean checkIFPhoneHasBluetoothAdapter(){
+        PackageManager PM= this.getPackageManager();
+        return PM.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        this.bluetoothSearch.onDestroy();
     }
 }

@@ -1,5 +1,6 @@
 package fr.esigelec.bluetoothbot;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -19,14 +20,53 @@ import java.util.Set;
 public class BluetoothSearch {
 
     private BluetoothAdapter bluetoothAdapter;
+    private boolean bluetoothState;
+    private Activity activity;
 
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
 
-    public BluetoothSearch(BluetoothAdapter adapter){
+    public BluetoothSearch(BluetoothAdapter adapter, Activity activity){
         this.bluetoothAdapter   = adapter;
+        this.activity           = activity;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
+        this.bluetoothState     = this.bluetoothAdapter.isEnabled();
+        this.stopDiscovery();
+    }
+
+    /**
+     * Get bluetooth state
+     * @return
+     */
+    public boolean getBluetoothState(){
+        return this.bluetoothState;
+    }
+
+    /**
+     * Turn on/off bluetooth
+     * @param
+     */
+    public void turnOnOffBluetooth(HomeActivity home, boolean mode) {
+        // on
+        if(mode){
+            if (!this.bluetoothAdapter.isEnabled()){
+                this.bluetoothAdapter.enable();
+                /*Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                home.startActivityForResult(turnOn, 0);*/
+                Toast.makeText(home.getApplicationContext(), "Bluetooth turned on",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(home.getApplicationContext(), "Bluetooth already on", Toast.LENGTH_LONG).show();
+            }
+            // off
+        }else{
+            if (this.bluetoothAdapter.isEnabled()){
+                this.bluetoothAdapter.disable();
+                Toast.makeText(home.getApplicationContext(), "Bluetooth turned off",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(home.getApplicationContext(), "Bluetooth already off", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     /**
@@ -61,38 +101,66 @@ public class BluetoothSearch {
 
     }
 
+    /**
+     * Stop discovery mode if adapter is in discovery mode
+     */
+    private void stopDiscovery(){
+        if (this.bluetoothAdapter.isDiscovering()) {
+            this.bluetoothAdapter.cancelDiscovery();
+        }
+    }
 
     /**
      * Begin bluetooth device discovery
      * @param
      */
     private void updateListDiscoveredBluetooth(){
-        if (this.bluetoothAdapter.isDiscovering()) {
-            this.bluetoothAdapter.cancelDiscovery();
-        }
+        this.stopDiscovery();
         this.bluetoothAdapter.startDiscovery();
 
-        //IntentFilter ifilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        //this.registerReceiver(bluetoothReceiver, ifilter);
+        // init array
+        this.discoveredDevices = new ArrayList<BluetoothDevice>();
+
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
     }
 
     /**
      * Bluetooth Receiver from discovery
      */
-    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
+        @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Notification
-                //Toast.makeText(getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
                 Log.i("BluetoothSearch", "Device found");
 
                 // Create a new device item
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                // Add to the list
-                discoveredDevices.add(device);
+                // If it's already paired, skip it, because it's been listed already
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    discoveredDevices.add(device);
+                }
+
+            }
+
+            if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
+                if (discoveredDevices.size() == 0) {
+                    Log.i("BluetoothSearch", "No device found");
+                }
+                Toast.makeText(activity.getApplicationContext(), "Discovery ended",Toast.LENGTH_LONG).show();
+                Log.i("BluetoothSearch", "Discovery ended");
             }
         }
     };
+
+    // On destroy
+    protected void onDestroy(){
+        this.bluetoothAdapter.cancelDiscovery();
+        this.activity.unregisterReceiver(this.broadcastReceiver);
+    }
+
 }
