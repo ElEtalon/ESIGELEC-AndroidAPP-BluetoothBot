@@ -3,6 +3,7 @@ package fr.esigelec.bluetoothbot;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -107,6 +108,12 @@ public class BluetoothSearch {
      * Stop discovery mode if adapter is in discovery mode
      */
     private void stopDiscovery(){
+        try{
+            this.activity.unregisterReceiver(this.broadcastReceiver);
+        } catch(Exception e){
+            Log.e("BluetoothSearch", "Try to unregister failed");
+        }
+
         if (this.bluetoothAdapter.isDiscovering()) {
             this.bluetoothAdapter.cancelDiscovery();
         }
@@ -123,8 +130,16 @@ public class BluetoothSearch {
         // init array
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
-        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        BluetoothManager manager = new android.bluetooth.BluetoothManager();
+
+        /*this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+
+        this.bluetoothAdapter.startDiscovery();*/
+
     }
 
     /**
@@ -134,8 +149,10 @@ public class BluetoothSearch {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            Log.i("BluetoothSearch", "Action:"+action);
+
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Notification
+                // Notification"
                 Toast.makeText(activity.getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
                 Log.i("BluetoothSearch", "Device found");
 
@@ -147,6 +164,13 @@ public class BluetoothSearch {
                     discoveredDevices.add(device);
                 }
 
+                bluetoothCallback.onBluetoothDiscoveryFound(device);
+
+            }
+
+            if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)){
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                Log.i("BluetoothSearch", "MODE : " + mode);
             }
 
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){

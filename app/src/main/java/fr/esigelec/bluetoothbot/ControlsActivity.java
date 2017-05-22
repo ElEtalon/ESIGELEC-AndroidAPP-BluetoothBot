@@ -109,7 +109,8 @@ public class ControlsActivity extends AppCompatActivity implements BluetoothCall
     @Override
     public void onBluetoothConnection(int returnCode) {
         if(returnCode == Constants.BLUETOOTH_CONNECTED_ERROR){
-            Log.d("ControlsActivity", "Disconnected : go to home");
+            Log.d("ControlsActivity", "Disconnected - go to home");
+            Toast.makeText(getApplicationContext(), "Connection lost", Toast.LENGTH_SHORT).show();
             Intent homePage = new Intent(ControlsActivity.this, HomeActivity.class);
             startActivity(homePage);
         }

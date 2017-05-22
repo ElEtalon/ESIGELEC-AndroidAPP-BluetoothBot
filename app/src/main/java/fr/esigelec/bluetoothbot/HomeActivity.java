@@ -215,7 +215,7 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
             public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
                 final BluetoothDevice selected = pairedDevices.get((int)id);
 
-                Toast.makeText(getApplicationContext(), "Connecting to " + selected.getName() + "...", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Connecting to " + selected.getName() + "...", Toast.LENGTH_SHORT).show();
 
                 // try to connect
                 Thread tryConnection = new Thread() {
