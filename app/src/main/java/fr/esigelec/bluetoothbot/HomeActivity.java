@@ -376,5 +376,4 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
                 progressBarDiscovered.setVisibility(View.INVISIBLE);
         }
     }
-
 }
