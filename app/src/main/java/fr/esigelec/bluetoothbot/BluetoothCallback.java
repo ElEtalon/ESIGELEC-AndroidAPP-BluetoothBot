@@ -9,22 +9,22 @@ public interface BluetoothCallback {
         /**
      * Called when the bluetooth is off.
      */
-    void onBluetoothOff();
+    //void onBluetoothOff();
 
     /**
      * Called when the bluetooth is turning on.
      */
-    void onBluetoothTurningOn();
+    //void onBluetoothTurningOn();
 
     /**
      * Called when the bluetooth is on, and ready for use.
      */
-    void onBluetoothOn();
+    //void onBluetoothOn();
 
     /**
      * Called when the bluetooth is turning off.
      */
-    void onBluetoothTurningOff();
+    //void onBluetoothTurningOff();
 
     /*
      * Callback to see how the connection between the devices has been
@@ -39,7 +39,7 @@ public interface BluetoothCallback {
     /*
      * Callback in order to see how the Discovering is behaving
      */
-    void onBluetoothDiscovery(int returnCode);
+    //void onBluetoothDiscovery(int returnCode);
 
     /**
      *

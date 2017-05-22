@@ -39,7 +39,6 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSearch bluetoothSearch;
     private boolean bluetoothState;
-    private ProgressBar progressBarDiscovery;
 
     private TextView textConnectivity;
     private ConnectivityManager connectivityManager;
@@ -129,10 +128,6 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         // if the phone has not bluetooth adapter
         this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
 
-        // get loading
-        this.progressBarDiscovery = (ProgressBar) findViewById(R.id.progressBarDiscovery);
-        this.progressBarDiscovery.setProgress(0);
-
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
 
@@ -220,7 +215,7 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
             public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
                 final BluetoothDevice selected = pairedDevices.get((int)id);
 
-                Toast.makeText(getApplicationContext(), "Connection to " + selected.getName() + "...", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Connecting to " + selected.getName() + "...", Toast.LENGTH_LONG).show();
 
                 // try to connect
                 Thread tryConnection = new Thread() {
@@ -254,13 +249,6 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
 
         // try to connect
         bluetoothConnection.bluetoothConnect();
-
-        /*// if connected
-        if(bluetoothConnection.isConnected()) {
-            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
-            controlsPage.putExtra("BluetoothDevice", selected);
-            startActivity(controlsPage);
-        }*/
     }
 
     /**
@@ -284,17 +272,11 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         // reset list
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
-        // update textview
-        //this.bluetoothDiscoveryLoading.setText("Discovery...");
-
         // get list of bluetooth Devices
         this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
-
-        // update textview
-        //this.bluetoothDiscoveryLoading.setText("Discovery end");
     }
 
     /**
@@ -336,28 +318,13 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
 
     @Override
     public void onBluetoothDiscoveryFound(BluetoothDevice device) {
+        // Add the new device
+        this.discoveredDevices.add(device);
 
+        // update the list
+        this.listViewUpdate(this.discoveredDevices);
     }
 
-    @Override
-    public void onBluetoothOff() {
-
-    }
-
-    @Override
-    public void onBluetoothTurningOn() {
-
-    }
-
-    @Override
-    public void onBluetoothOn() {
-
-    }
-
-    @Override
-    public void onBluetoothTurningOff() {
-
-    }
 
     @Override
     public void onBluetoothConnection(int returnCode) {
@@ -372,8 +339,4 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
 
     }
 
-    @Override
-    public void onBluetoothDiscovery(int returnCode) {
-
-    }
 }

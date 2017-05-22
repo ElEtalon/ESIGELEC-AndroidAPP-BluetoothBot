@@ -43,7 +43,11 @@ public class BluetoothConnection {
             case Constants.BLUETOOTH_CONNECTED:
                 this.bluetoothCallback.onBluetoothConnection(Constants.BLUETOOTH_CONNECTED);
 
+            case Constants.BLUETOOTH_CONNECTED_ERROR:
+                this.bluetoothCallback.onBluetoothConnection(Constants.BLUETOOTH_CONNECTED_ERROR);
+
         }
+        Log.d("BluetoothConnection", "new state : " + state);
         this.bluetoothState = state;
     }
 
@@ -76,8 +80,6 @@ public class BluetoothConnection {
             this.bluetoothConnectedThread.cancel();
             this.bluetoothConnectedThread = null;
         }
-
-        this.setState(Constants.getInstance().STATE_NONE);
     }
 
     /**
@@ -99,14 +101,23 @@ public class BluetoothConnection {
     }
 
     /**
+     *
+     * @param socket
+     */
+    public void setBluetoothSocket(BluetoothSocket socket){
+        this.bluetoothSocket = socket;
+    }
+
+    /**
      * Called when connection is successful
      */
     private void connectionSuccessful(){
         // set device in data model
         DataModel.getInstance().connectedDevice = this.bluetoothDevice;
+        DataModel.getInstance().connectedSocket = this.bluetoothConnectThread.getSocket();
 
         // get connected socket
-        this.bluetoothSocket = this.bluetoothConnectThread.getSocket();
+        this.setBluetoothSocket(this.bluetoothConnectThread.getSocket());
 
         // set state to connection
         this.setState(Constants.getInstance().BLUETOOTH_CONNECTED);
@@ -150,9 +161,6 @@ public class BluetoothConnection {
         if(this.bluetoothConnectThread.getConnected()){
              // reset the thread
             this.connectionSuccessful();
-
-            // Start the connected thread
-            this.bluetoothConnected();
         }else{
             // return to listenning mode
             this.connectionFailed();
