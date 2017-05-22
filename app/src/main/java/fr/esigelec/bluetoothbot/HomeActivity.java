@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,6 +25,8 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import static android.R.attr.name;
+
 public class HomeActivity extends AppCompatActivity  implements BluetoothCallback{
 
     private ImageButton imgAboutButton;
@@ -37,8 +40,9 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
     private ToggleButton buttonBluetoothOnOff;
     private Switch switchBluetooth;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSearch bluetoothSearch;
+    private BluetoothService bluetoothSearch;
     private boolean bluetoothState;
+    private ProgressBar progressBarDiscovered;
 
     private TextView textConnectivity;
     private ConnectivityManager connectivityManager;
@@ -88,9 +92,6 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         // check if phone has the sensor
         this.checkBoxAutoLux.setEnabled(this.checkIFPhoneHasLightSensor());
 
-        // set auto mode false
-        this.checkBoxAutoLux.setChecked(false);
-
         // get sensor manager
         this.sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
@@ -100,8 +101,8 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         // Set the current luminosity with the current screen luminosity
         this.luminosityControl.updateCurrentLuminosityWithCurrentSystemLuminosity(getContentResolver());
 
-        // update seekBar progress
-        this.seekBarLuminiosity.setProgress((int)this.luminosityControl.getCurrentLuminosity());
+        // update seek bar and check box
+        this.updateLuminosityControls();
 
         /*
         * About button
@@ -117,10 +118,14 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this, this);
+        this.bluetoothSearch = new BluetoothService(this.bluetoothAdapter, this, this);
 
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
+
+        // progress bar
+        this.progressBarDiscovered = (ProgressBar) findViewById(R.id.progressBarDiscovered);
+        this.progressBarDiscovered.setVisibility(View.INVISIBLE);
 
         // set the switch on/off
         this.buttonBluetoothOnOff.setChecked(this.bluetoothSearch.getBluetoothState());
@@ -198,11 +203,13 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
                 // Display paired devices
                 if (switchBluetooth.isChecked()) {
                     Toast.makeText(getApplicationContext(), "Display paired devices", Toast.LENGTH_LONG).show();
+                    progressBarDiscovered.setVisibility(View.INVISIBLE);
                     displayPairedDevices();
 
                 // Display discovered devices
                 }else {
                     Toast.makeText(getApplicationContext(), "Display discovery devices", Toast.LENGTH_LONG).show();
+                    progressBarDiscovered.setVisibility(View.VISIBLE);
                     displayDiscoveredDevices();
                 }
             }
@@ -249,6 +256,29 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
 
         // try to connect
         bluetoothConnection.bluetoothConnect();
+    }
+
+    /**
+     * Update luminosity seek bar and check box
+     */
+    private void updateLuminosityControls(){
+        // seek bar
+        try {
+            this.seekBarLuminiosity.setProgress(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS));
+        } catch (Settings.SettingNotFoundException e) {
+            this.seekBarLuminiosity.setProgress(0);
+        }
+
+        // check box
+        try {
+            if(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE) == 1){
+                this.checkBoxAutoLux.setChecked(true);
+            }else{
+                this.checkBoxAutoLux.setChecked(false);
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            this.checkBoxAutoLux.setChecked(false);
+        }
     }
 
     /**
@@ -328,7 +358,7 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
 
     @Override
     public void onBluetoothConnection(int returnCode) {
-        if(returnCode == Constants.getInstance().BLUETOOTH_CONNECTED){
+        if(returnCode == Constants.BLUETOOTH_CONNECTED){
             Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
             startActivity(controlsPage);
         }
@@ -337,6 +367,14 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
     @Override
     public void onReceiveData(String data) {
 
+    }
+
+    @Override
+    public void onBluetoothDiscovery(int code) {
+        switch (code){
+            case Constants.BAR_FINISHED:
+                progressBarDiscovered.setVisibility(View.INVISIBLE);
+        }
     }
 
 }

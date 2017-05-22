@@ -31,6 +31,11 @@ class Constants {
     public static final int MANUAL_MODE = 8;
     public static final int AUTO_MODE = 9;
 
+
+    // Progress bar
+    public static final int BAR_FINISHED = 0;
+    public static final int BAR_BEGIN = 0;
+
     static Constants getInstance() {
         return ourInstance;
     }

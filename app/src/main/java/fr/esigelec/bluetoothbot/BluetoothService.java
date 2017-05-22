@@ -3,7 +3,6 @@ package fr.esigelec.bluetoothbot;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +17,7 @@ import java.util.Set;
  * Created by Paul on 16/05/2017.
  */
 
-public class BluetoothSearch {
+public class BluetoothService {
 
     private BluetoothAdapter bluetoothAdapter;
     private boolean bluetoothState;
@@ -28,7 +27,7 @@ public class BluetoothSearch {
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
 
-    public BluetoothSearch(BluetoothAdapter adapter, Activity activity, BluetoothCallback callback){
+    public BluetoothService(BluetoothAdapter adapter, Activity activity, BluetoothCallback callback){
         this.bluetoothAdapter   = adapter;
         this.activity           = activity;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
@@ -128,17 +127,15 @@ public class BluetoothSearch {
         this.bluetoothAdapter.startDiscovery();
 
         // init array
-        this.discoveredDevices = new ArrayList<BluetoothDevice>();
+        this.discoveredDevices = new ArrayList<>();
 
-        BluetoothManager manager = new android.bluetooth.BluetoothManager();
-
-        /*this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
 
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
 
-        this.bluetoothAdapter.startDiscovery();*/
+        this.bluetoothAdapter.startDiscovery();
 
     }
 
@@ -163,9 +160,7 @@ public class BluetoothSearch {
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     discoveredDevices.add(device);
                 }
-
                 bluetoothCallback.onBluetoothDiscoveryFound(device);
-
             }
 
             if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)){
@@ -179,6 +174,7 @@ public class BluetoothSearch {
                 }
                 Toast.makeText(activity.getApplicationContext(), "Discovery ended",Toast.LENGTH_LONG).show();
                 Log.i("BluetoothSearch", "Discovery ended");
+                bluetoothCallback.onBluetoothDiscovery(Constants.BAR_FINISHED);
             }
         }
     };

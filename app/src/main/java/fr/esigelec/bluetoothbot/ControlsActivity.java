@@ -122,6 +122,11 @@ public class ControlsActivity extends AppCompatActivity implements BluetoothCall
     }
 
     @Override
+    public void onBluetoothDiscovery(int code) {
+
+    }
+
+    @Override
     public void onBluetoothDiscoveryFound(BluetoothDevice device) {
 
     }

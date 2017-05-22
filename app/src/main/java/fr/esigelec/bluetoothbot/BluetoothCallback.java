@@ -42,6 +42,12 @@ public interface BluetoothCallback {
     //void onBluetoothDiscovery(int returnCode);
 
     /**
+     * Call back discovery
+     * @param code
+     */
+    void onBluetoothDiscovery(int code);
+
+    /**
      *
      */
     void onBluetoothDiscoveryFound(BluetoothDevice device);
