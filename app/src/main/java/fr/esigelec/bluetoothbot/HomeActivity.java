@@ -63,11 +63,12 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
             Utils.testPermission(this, Settings.ACTION_MANAGE_WRITE_SETTINGS);
         }
 
+        //------------------------------------------------------------------------------------------
         /*
         * Connectivity
         */
         // Instance connectivity Manager class
-        /*this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        this.connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         // get text view
         this.textConnectivity = (TextView) findViewById(R.id.TextConnectivity);
@@ -77,7 +78,15 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         this.connectivity = new Connectivity(textConnectivity, connectivityManager);
 
         // execute request
-        new RequeteHttp().execute(this.textConnectivity);*/
+        new RequeteHttp().execute(this.textConnectivity);
+
+        /*
+        * FireBase Token de la mort
+         */
+        FireBaseToken FBtoken = new FireBaseToken();
+
+
+        //------------------------------------------------------------------------------------------
 
         /*
         * Luminiosity utils

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "33319203232",
+    "firebase_url": "https://esigelec-androidapp-bluebot.firebaseio.com",
+    "project_id": "esigelec-androidapp-bluebot",
+    "storage_bucket": "esigelec-androidapp-bluebot.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33319203232:android:187872044565549a",
+        "android_client_info": {
+          "package_name": "fr.esigelec.bluetoothbot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "33319203232-87sh8nu7huq7n2i8cu7lr5l707tbkjv5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fr.esigelec.bluetoothbot",
+            "certificate_hash": "0201def3198649db956f8f33c125222c6173847e"
+          }
+        },
+        {
+          "client_id": "33319203232-7qd6iokvro8i7k5f9tpmkbvmmhe7jdkg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAD7wxd0IhHEtKH9ACG9sUs6VisMiFnPAI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "33319203232-7qd6iokvro8i7k5f9tpmkbvmmhe7jdkg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
