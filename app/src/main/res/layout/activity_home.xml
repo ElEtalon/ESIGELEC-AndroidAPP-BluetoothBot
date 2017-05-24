@@ -118,8 +118,7 @@
             android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/checkBoxAutoLux"
-            android:layout_alignStart="@+id/textView16"
-            android:layout_alignTop="@+id/toggleBluetooth" />
+            android:layout_alignEnd="@+id/discover_paired" />
 
         <TextView
             android:id="@+id/textViewLux"
@@ -127,7 +126,7 @@
             android:layout_height="wrap_content"
             android:text="Luminiosity"
             android:layout_above="@+id/seekBarLuminiosity"
-            android:layout_alignEnd="@+id/discover_paired" />
+            android:layout_toStartOf="@+id/discover_paired" />
 
         <CheckBox
             android:id="@+id/checkBoxAutoLux"
@@ -135,7 +134,7 @@
             android:layout_height="wrap_content"
             android:text="Auto"
             android:layout_alignTop="@+id/textViewBlueActivate"
-            android:layout_toEndOf="@+id/discover_paired" />
+            android:layout_alignStart="@+id/TextConnectivity" />
 
         <ProgressBar
             android:id="@+id/progressBarDiscovery"
