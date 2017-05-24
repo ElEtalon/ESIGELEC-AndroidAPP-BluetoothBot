@@ -45,7 +45,7 @@ public class ControlsActivity extends AppCompatActivity implements BluetoothCall
         // bluetooth connection class
         this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice, this);
         this.bluetoothConnection.setBluetoothSocket(DataModel.getInstance().connectedSocket);
-        this.bluetoothConnection.bluetoothConnected();
+        this.bluetoothConnection.bluetoothConnected(DataModel.getInstance().connectedSocket);
 
         // get title to change & init console
         this.deviceName = (TextView) findViewById(R.id.deviceName);

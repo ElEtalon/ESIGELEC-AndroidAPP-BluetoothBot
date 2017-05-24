@@ -146,12 +146,12 @@ public class BluetoothService {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.i("BluetoothSearch", "Action:"+action);
+            Log.i("BluetoothService", "Action:"+action);
 
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Notification"
                 Toast.makeText(activity.getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
-                Log.i("BluetoothSearch", "Device found");
+                Log.i("BluetoothService", "Device found");
 
                 // Create a new device item
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -165,15 +165,15 @@ public class BluetoothService {
 
             if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)){
                 int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-                Log.i("BluetoothSearch", "MODE : " + mode);
+                Log.i("BluetoothService", "MODE : " + mode);
             }
 
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
                 if (discoveredDevices.size() == 0) {
-                    Log.i("BluetoothSearch", "No device found");
+                    Log.i("BluetoothService", "No device found");
                 }
                 Toast.makeText(activity.getApplicationContext(), "Discovery ended",Toast.LENGTH_LONG).show();
-                Log.i("BluetoothSearch", "Discovery ended");
+                Log.i("BluetoothService", "Discovery ended");
                 bluetoothCallback.onBluetoothDiscovery(Constants.BAR_FINISHED);
             }
         }

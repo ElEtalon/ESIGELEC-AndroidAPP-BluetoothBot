@@ -129,14 +129,14 @@ public class BluetoothConnection {
     /**
      * Start the connected thread to manage exchanges
      */
-    public void bluetoothConnected(){
+    public void bluetoothConnected(BluetoothSocket socket){
         Log.d("BluetoothConnection", "connected");
 
         // Cancel all threads
         this.stop();
 
         // Start the thread to manage the connection and perform transmissions
-        this.bluetoothConnectedThread = new BluetoothConnectedThread(this.bluetoothSocket);
+        this.bluetoothConnectedThread = new BluetoothConnectedThread(socket);
         this.bluetoothConnectedThread.run();
 
         // set the state to connected
