@@ -32,11 +32,19 @@ public class Connectivity {
         {
             //android.permission.ACCESS_NETWORK_STATE;   VOIR Android Manifest
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            TextConnectivity.setText(networkInfo.getTypeName());
+            try
+            {
+                TextConnectivity.setText(networkInfo.getTypeName());
+            }
+            catch(Exception e)
+            {
+                TextConnectivity.setText("unknown");
+                Log.e("Connectivity", "ERROR : unknown network type OR disconnected", e);
+            }
         }
         catch(Exception e)
         {
-            TextConnectivity.setText("getActiveNetworkInfo failed");
+            TextConnectivity.setText("failed");
             Log.e("Connectivity", "Error when attempt to 'get active network info'", e);
         }
     }

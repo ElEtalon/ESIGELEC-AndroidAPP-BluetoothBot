@@ -67,6 +67,7 @@ public class RequeteHttp extends AsyncTask<TextView, Void, String> {
         catch (IOException e) {
             e.printStackTrace();
         }
+
         return sb.toString();
     }
 }

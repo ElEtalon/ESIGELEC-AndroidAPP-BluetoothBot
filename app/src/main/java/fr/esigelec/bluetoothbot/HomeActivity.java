@@ -78,12 +78,13 @@ public class HomeActivity extends AppCompatActivity  implements BluetoothCallbac
         this.connectivity = new Connectivity(textConnectivity, connectivityManager);
 
         // execute request
-        new RequeteHttp().execute(this.textConnectivity);
+        //new RequeteHttp().execute(this.textConnectivity);
 
         /*
         * FireBase Token de la mort
          */
         FireBaseToken FBtoken = new FireBaseToken();
+        FireBaseNotification FBnotification = new FireBaseNotification();
 
 
         //------------------------------------------------------------------------------------------
