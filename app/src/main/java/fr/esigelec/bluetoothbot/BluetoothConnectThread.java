@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
@@ -14,29 +15,17 @@ import java.util.UUID;
  */
 
 public class BluetoothConnectThread extends Thread {
-    private final BluetoothSocket bluetoothSocket;
+    private BluetoothSocket bluetoothSocket;
     private final BluetoothDevice bluetoothDevice;
     private final BluetoothAdapter bluetoothAdapter;
     private boolean connected;
 
-    private static final UUID BLUE_UUID = UUID.fromString("00030000-0000-1000-8000-00805F9B34FB");
+    private static final UUID BLUE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     public BluetoothConnectThread(BluetoothAdapter adapter, BluetoothDevice device) {
         this.bluetoothDevice = device;
         this.bluetoothAdapter = adapter;
         this.connected = false;
-        BluetoothSocket tmp = null;
-
-        // Try to connect to the device
-        try {
-            tmp = device.createRfcommSocketToServiceRecord(BLUE_UUID);
-            //tmp = (BluetoothSocket) this.bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(this.bluetoothDevice,1);
-        } catch (Exception e) {
-            Log.e("BluetoothConnectThread", "connection failed", e);
-        }
-
-        // set the final value of the socket
-        this.bluetoothSocket = tmp;
     }
 
     /**
@@ -74,20 +63,32 @@ public class BluetoothConnectThread extends Thread {
         // Prevent fail
         this.stopDiscovery();
 
-        // Use the socket to create connection
+        BluetoothSocket socket = null;
+        BluetoothSocket socketFallback;
+
+        // Try to connect to the device
         try {
-            // Try to connect thanks to the socket instantiated in the constructor
-            this.bluetoothSocket.connect();
-        } catch (IOException e) {
-            // Close the socket
+            socket = this.bluetoothDevice.createRfcommSocketToServiceRecord(this.bluetoothDevice.getUuids()[0].getUuid());
+            socket.connect();
+            this.connected = true;
+        } catch (Exception e) {
+            Log.e("BluetoothConnectThread", "Error when opening socket, try with falling back..", e);
+            Class<?> clazz = socket.getRemoteDevice().getClass();
+            Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
             try {
-                this.bluetoothSocket.close();
-            } catch (IOException e2) {
-                Log.e("BluetoothConnectThread", "Error when closing the socket", e2);
+                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                Object[] params = new Object[]{Integer.valueOf(1)};
+                socketFallback = (BluetoothSocket) m.invoke(socket.getRemoteDevice(), params);
+                socketFallback.connect();
+                this.connected = true;
+            } catch (Exception e2) {
+                Log.e("BluetoothConnectThread", "Error when conection with fallback...", e2);
+                this.connected = false;
             }
-            this.connected = false;
         }
-        this.connected = true;
+
+        // set the final value of the socket
+        this.bluetoothSocket = socket;
     }
 
     /**

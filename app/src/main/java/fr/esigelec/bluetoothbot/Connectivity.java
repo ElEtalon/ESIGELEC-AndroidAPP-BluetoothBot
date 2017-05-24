@@ -39,7 +39,7 @@ public class Connectivity {
             catch(Exception e)
             {
                 TextConnectivity.setText("unknown");
-                Log.e("Connectivity", "ERROR : unknown network type OR disconnected", e);
+                Log.e("Connectivity", "ERROR : unknown network type OR disconnected");
             }
         }
         catch(Exception e)
