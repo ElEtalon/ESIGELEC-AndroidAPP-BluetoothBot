@@ -18,7 +18,6 @@ public class LuminosityControl {
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private float currentLuminosity;
-    private SensorEventListener luminosityListener;
     private boolean luminosityMode;
     private static int maxLum = 255;
 

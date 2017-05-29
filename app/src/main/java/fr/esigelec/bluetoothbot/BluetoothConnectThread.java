@@ -68,7 +68,7 @@ public class BluetoothConnectThread extends Thread {
 
         // Try to connect to the device
         try {
-            socket = this.bluetoothDevice.createRfcommSocketToServiceRecord(this.bluetoothDevice.getUuids()[0].getUuid());
+            socket = this.bluetoothDevice.createRfcommSocketToServiceRecord(BLUE_UUID);
             socket.connect();
             this.connected = true;
         } catch (Exception e) {
