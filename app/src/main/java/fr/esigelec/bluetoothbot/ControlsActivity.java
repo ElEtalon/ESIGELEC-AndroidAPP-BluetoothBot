@@ -3,6 +3,7 @@ package fr.esigelec.bluetoothbot;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,10 +32,24 @@ public class ControlsActivity extends AppCompatActivity {
     private Button buttonMinus;
     private ImageButton imageButtonPower;
 
+    private LuminosityControl luminosityControl;
+    private SensorManager sensorManager;
+
+    private RequeteHttp requeteHttp = new RequeteHttp();
+    private String strRequest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controls);
+
+        //-----------------------------------------------------------------------
+        // get sensor manager
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+        // Create luminiosity control class
+        luminosityControl = new LuminosityControl(sensorManager);
+        //----------------------------------------------------------------------
 
         // get the device name from previous activity
         Bundle extras = getIntent().getExtras();
@@ -88,30 +103,48 @@ public class ControlsActivity extends AppCompatActivity {
     }
 
     public void onClick(View v) {
+        // Set the current luminosity with the current screen luminosity
+        luminosityControl.updateCurrentLuminosityWithCurrentSystemLuminosity(getContentResolver());
         switch (v.getId()) {
             case R.id.GoBottom:
                 Toast.makeText(getApplicationContext(), "Go Bottom", Toast.LENGTH_SHORT).show();
+                strRequest = "action=reculer";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.GoForward:
                 Toast.makeText(getApplicationContext(), "Go Forward", Toast.LENGTH_SHORT).show();
+                strRequest = "action=avancer";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.GoLeft:
                 Toast.makeText(getApplicationContext(), "Go Left", Toast.LENGTH_SHORT).show();
+                strRequest = "action=gauche";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.GoRight:
                 Toast.makeText(getApplicationContext(), "Go Right", Toast.LENGTH_SHORT).show();
+                strRequest = "action=droite";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.ButtonMinus:
                 Toast.makeText(getApplicationContext(), "Speed -", Toast.LENGTH_SHORT).show();
+                strRequest = "action=speed--";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.ButtonPlus:
                 Toast.makeText(getApplicationContext(), "Speed +", Toast.LENGTH_SHORT).show();
+                strRequest = "action=speed++";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.ImageButtonPower:
                 Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
+                strRequest = "action=stop";
+                requeteHttp.executerRequete(strRequest);
                 break;
             case R.id.SwitchMode:
                 Toast.makeText(getApplicationContext(), "Switched", Toast.LENGTH_SHORT).show();
+                strRequest = "action=switch";
+                requeteHttp.executerRequete(strRequest);
                 break;
             default:
                 break;

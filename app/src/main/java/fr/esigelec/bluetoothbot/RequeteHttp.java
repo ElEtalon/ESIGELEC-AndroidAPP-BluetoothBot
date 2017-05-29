@@ -19,7 +19,7 @@ public class RequeteHttp extends AsyncTask<TextView, Void, String> {
     @Override
     protected String doInBackground(TextView... params){
         textConnectivity = params[0];
-        return executerRequete();
+        return "ok";//executerRequete(strRequest);
     }
 
     @Override
@@ -27,12 +27,14 @@ public class RequeteHttp extends AsyncTask<TextView, Void, String> {
         //textConnectivity.setText(result);
     }
 
-    public String executerRequete() {
+    public String executerRequete(String strRequest) {
         HttpURLConnection urlConnection = null;
         String webcontent = null;
 
         try{
-            URL url = new URL("http://ip-api.com/json/192.52.189.194");
+            String strBaseRequest = "http://cabani.net/ise/adddata.php?idproject=8&lux=10&timestamp=1488534460&"; //action=avancer
+            strBaseRequest = strBaseRequest + strRequest;
+            URL url = new URL(strBaseRequest);         //"http://ip-api.com/json/192.52.189.194"
             urlConnection = (HttpURLConnection) url.openConnection();
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
             webcontent = generateString(in);

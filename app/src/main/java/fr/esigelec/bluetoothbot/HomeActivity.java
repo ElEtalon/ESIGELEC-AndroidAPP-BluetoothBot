@@ -85,7 +85,7 @@ public class HomeActivity extends AppCompatActivity {
         this.connectivity = new Connectivity(textConnectivity, connectivityManager);
 
         // execute request
-        new RequeteHttp().execute(this.textConnectivity);
+        //new RequeteHttp().execute(this.textConnectivity);
 
         /*
         * FireBase Token de la mort
@@ -250,11 +250,11 @@ public class HomeActivity extends AppCompatActivity {
                         bluetoothConnection.bluetoothConnect();
 
                         // if connected
-                        if(bluetoothConnection.isConnected()) {
+                        //if(bluetoothConnection.isConnected()) {
                             Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
                             controlsPage.putExtra("BluetoothDevice", selected);
                             startActivity(controlsPage);
-                        }
+                        //}
                     }
                 };
                 tryConnection.start();
