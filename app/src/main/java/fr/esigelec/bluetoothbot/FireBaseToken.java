@@ -17,12 +17,11 @@ public class FireBaseToken extends FirebaseInstanceIdService
     {
         //exemple token: ePxqKjkJEEk:APA91bGlzlocQ7WlfwG6y0FzPi_hldO7SlWyL-MQEpp6qTAEaR9N6KtwuQkNsX37gfIJKSKw6qoKO7L-9a35XCv17klMdD5d4pQb8ZB3hw_kCvl432OmL-6oK7rIM1YCqylVA1TYCoZS
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        sendRegistrationToServer(refreshedToken);
         Log.d("Jean-Jacques", "Refreshed Token: "+ refreshedToken);
     }
 
-    public void onMessageReceived(RemoteMessage remoteMessage)
-    {
-        Log.d("Jean-Jacques", "Form: "+ remoteMessage.getFrom());
-        Log.d("Jean-Jacques", "Notification Message Body: "+ remoteMessage.getNotification().getBody());
+    private void sendRegistrationToServer(String refreshedToken) {
     }
 }
+

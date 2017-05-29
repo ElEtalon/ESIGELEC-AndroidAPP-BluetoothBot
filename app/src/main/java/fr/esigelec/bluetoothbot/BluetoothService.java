@@ -17,21 +17,23 @@ import java.util.Set;
  * Created by Paul on 16/05/2017.
  */
 
-public class BluetoothSearch {
+public class BluetoothService {
 
     private BluetoothAdapter bluetoothAdapter;
     private boolean bluetoothState;
     private Activity activity;
+    private BluetoothCallback bluetoothCallback;
 
     private ArrayList<BluetoothDevice> discoveredDevices;
     private ArrayList<BluetoothDevice> pairedDevices;
 
-    public BluetoothSearch(BluetoothAdapter adapter, Activity activity){
+    public BluetoothService(BluetoothAdapter adapter, Activity activity, BluetoothCallback callback){
         this.bluetoothAdapter   = adapter;
         this.activity           = activity;
         this.discoveredDevices  = new ArrayList<BluetoothDevice>();
         this.pairedDevices      = new ArrayList<BluetoothDevice>();
         this.bluetoothState     = this.bluetoothAdapter.isEnabled();
+        this.bluetoothCallback  = callback;
         this.stopDiscovery();
     }
 
@@ -105,6 +107,12 @@ public class BluetoothSearch {
      * Stop discovery mode if adapter is in discovery mode
      */
     private void stopDiscovery(){
+        try{
+            this.activity.unregisterReceiver(this.broadcastReceiver);
+        } catch(Exception e){
+            Log.e("BluetoothSearch", "Try to unregister failed");
+        }
+
         if (this.bluetoothAdapter.isDiscovering()) {
             this.bluetoothAdapter.cancelDiscovery();
         }
@@ -119,10 +127,16 @@ public class BluetoothSearch {
         this.bluetoothAdapter.startDiscovery();
 
         // init array
-        this.discoveredDevices = new ArrayList<BluetoothDevice>();
+        this.discoveredDevices = new ArrayList<>();
 
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
+        this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
         this.activity.registerReceiver(broadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+
+        this.bluetoothAdapter.startDiscovery();
+
     }
 
     /**
@@ -132,10 +146,12 @@ public class BluetoothSearch {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            Log.i("BluetoothService", "Action:"+action);
+
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Notification
+                // Notification"
                 Toast.makeText(activity.getApplicationContext(), "Device found",Toast.LENGTH_LONG).show();
-                Log.i("BluetoothSearch", "Device found");
+                Log.i("BluetoothService", "Device found");
 
                 // Create a new device item
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -144,15 +160,21 @@ public class BluetoothSearch {
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     discoveredDevices.add(device);
                 }
+                bluetoothCallback.onBluetoothDiscoveryFound(device);
+            }
 
+            if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)){
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                Log.i("BluetoothService", "MODE : " + mode);
             }
 
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
                 if (discoveredDevices.size() == 0) {
-                    Log.i("BluetoothSearch", "No device found");
+                    Log.i("BluetoothService", "No device found");
                 }
                 Toast.makeText(activity.getApplicationContext(), "Discovery ended",Toast.LENGTH_LONG).show();
-                Log.i("BluetoothSearch", "Discovery ended");
+                Log.i("BluetoothService", "Discovery ended");
+                bluetoothCallback.onBluetoothDiscovery(Constants.BAR_FINISHED);
             }
         }
     };

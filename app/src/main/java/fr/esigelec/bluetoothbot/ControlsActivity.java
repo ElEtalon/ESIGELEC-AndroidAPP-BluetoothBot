@@ -14,7 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ControlsActivity extends AppCompatActivity {
+public class ControlsActivity extends AppCompatActivity implements BluetoothCallback{
 
     // Bluetooth var
     private BluetoothDevice bluetoothDevice;
@@ -42,7 +42,6 @@ public class ControlsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controls);
-
         //-----------------------------------------------------------------------
         // get sensor manager
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -50,18 +49,17 @@ public class ControlsActivity extends AppCompatActivity {
         // Create luminiosity control class
         luminosityControl = new LuminosityControl(sensorManager);
         //----------------------------------------------------------------------
-
-        // get the device name from previous activity
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            this.bluetoothDevice = (BluetoothDevice) extras.get("BluetoothDevice");
-        }
+      
+        // get the device name
+        this.bluetoothDevice = (BluetoothDevice) DataModel.getInstance().connectedDevice;
 
         // bluetooth adapter
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // bluetooth connection class
-        this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice);
+        this.bluetoothConnection = new BluetoothConnection(this.bluetoothAdapter, this.bluetoothDevice, this);
+        this.bluetoothConnection.setBluetoothSocket(DataModel.getInstance().connectedSocket);
+        this.bluetoothConnection.bluetoothConnected(DataModel.getInstance().connectedSocket);
 
         // get title to change & init console
         this.deviceName = (TextView) findViewById(R.id.deviceName);
@@ -80,26 +78,7 @@ public class ControlsActivity extends AppCompatActivity {
         this.imageButtonPower   = (ImageButton) findViewById(R.id.ImageButtonPower);
 
         // show connection success
-        Toast.makeText(getApplicationContext(), "Connection successful to " + this.bluetoothDevice.getName(), Toast.LENGTH_LONG).show();
-
-        // check if connected
-        /*Thread tryConnection = new Thread() {
-            public void run() {
-                // connection
-                if(bluetoothConnection.bluetoothConnect(bluetoothDevice)) {
-                    Toast.makeText(getApplicationContext(), "Connection successful to " + bluetoothDevice.getName(), Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(getApplicationContext(), "Error when connecting to " + bluetoothDevice.getName(), Toast.LENGTH_LONG).show();
-                    Intent controlsPage=new Intent(ControlsActivity.this, HomeActivity.class);
-                    controlsPage.putExtra("BluetoothDevice", bluetoothDevice);
-                    startActivity(controlsPage);
-                }
-            }
-        };
-
-        tryConnection.start();*/
-
-
+        Log.i("ControlsActivity", "Connection successful to " + this.bluetoothDevice.getName());
     }
 
     public void onClick(View v) {
@@ -157,5 +136,30 @@ public class ControlsActivity extends AppCompatActivity {
      */
     private void updateConsole(String toAdd){
         this.console.append(toAdd);
+    }
+
+    @Override
+    public void onBluetoothConnection(int returnCode) {
+        if(returnCode == Constants.BLUETOOTH_CONNECTED_ERROR){
+            Log.d("ControlsActivity", "Disconnected - go to home");
+            Toast.makeText(getApplicationContext(), "Connection lost", Toast.LENGTH_SHORT).show();
+            Intent homePage = new Intent(ControlsActivity.this, HomeActivity.class);
+            startActivity(homePage);
+        }
+    }
+
+    @Override
+    public void onReceiveData(String data) {
+        updateConsole(data);
+    }
+
+    @Override
+    public void onBluetoothDiscovery(int code) {
+
+    }
+
+    @Override
+    public void onBluetoothDiscoveryFound(BluetoothDevice device) {
+
     }
 }

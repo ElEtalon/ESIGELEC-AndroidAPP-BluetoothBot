@@ -189,6 +189,7 @@
             android:layout_height="wrap_content"
             android:layout_alignStart="@+id/GoForward"
             android:layout_centerVertical="true"
+            android:onClick="onClick"
             android:rotation="180"
             android:text="^" />
     </RelativeLayout>

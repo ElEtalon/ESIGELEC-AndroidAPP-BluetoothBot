@@ -12,6 +12,15 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp">
 
+        <ProgressBar
+            android:id="@+id/progressBarDiscovered"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+            android:layout_width="150dp"
+            android:layout_height="65dp"
+            android:layout_above="@+id/listViewDevices"
+            android:layout_alignEnd="@+id/textView"
+            android:layout_marginEnd="13dp" />
+
         <TextView
             android:id="@+id/textView13"
             android:layout_width="wrap_content"
@@ -135,14 +144,6 @@
             android:text="Auto"
             android:layout_alignTop="@+id/textViewBlueActivate"
             android:layout_alignStart="@+id/TextConnectivity" />
-
-        <ProgressBar
-            android:id="@+id/progressBarDiscovery"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textView16"
-            android:layout_toEndOf="@+id/toggleBluetooth" />
 
     </RelativeLayout>
 

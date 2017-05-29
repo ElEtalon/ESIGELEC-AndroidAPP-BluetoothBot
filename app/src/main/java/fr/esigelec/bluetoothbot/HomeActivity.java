@@ -2,22 +2,13 @@ package fr.esigelec.bluetoothbot;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.content.ContentResolver;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
-import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -34,7 +25,9 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity {
+import static android.R.attr.name;
+
+public class HomeActivity extends AppCompatActivity  implements BluetoothCallback{
 
     private ImageButton imgAboutButton;
     private ListView listViewDevices;
@@ -47,9 +40,9 @@ public class HomeActivity extends AppCompatActivity {
     private ToggleButton buttonBluetoothOnOff;
     private Switch switchBluetooth;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSearch bluetoothSearch;
+    private BluetoothService bluetoothSearch;
     private boolean bluetoothState;
-    private ProgressBar progressBarDiscovery;
+    private ProgressBar progressBarDiscovered;
 
     private TextView textConnectivity;
     private ConnectivityManager connectivityManager;
@@ -91,6 +84,7 @@ public class HomeActivity extends AppCompatActivity {
         * FireBase Token de la mort
          */
         FireBaseToken FBtoken = new FireBaseToken();
+        FireBaseNotification FBnotification = new FireBaseNotification();
 
 
         //------------------------------------------------------------------------------------------
@@ -108,9 +102,6 @@ public class HomeActivity extends AppCompatActivity {
         // check if phone has the sensor
         this.checkBoxAutoLux.setEnabled(this.checkIFPhoneHasLightSensor());
 
-        // set auto mode false
-        this.checkBoxAutoLux.setChecked(false);
-
         // get sensor manager
         this.sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
@@ -120,8 +111,8 @@ public class HomeActivity extends AppCompatActivity {
         // Set the current luminosity with the current screen luminosity
         this.luminosityControl.updateCurrentLuminosityWithCurrentSystemLuminosity(getContentResolver());
 
-        // update seekBar progress
-        this.seekBarLuminiosity.setProgress((int)this.luminosityControl.getCurrentLuminosity());
+        // update seek bar and check box
+        this.updateLuminosityControls();
 
         /*
         * About button
@@ -137,20 +128,20 @@ public class HomeActivity extends AppCompatActivity {
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Create bluetoothSearch Class
-        this.bluetoothSearch = new BluetoothSearch(this.bluetoothAdapter, this);
+        this.bluetoothSearch = new BluetoothService(this.bluetoothAdapter, this, this);
 
         // turn on/off bluetooth
         this.buttonBluetoothOnOff = (ToggleButton) findViewById(R.id.toggleBluetooth);
+
+        // progress bar
+        this.progressBarDiscovered = (ProgressBar) findViewById(R.id.progressBarDiscovered);
+        this.progressBarDiscovered.setVisibility(View.INVISIBLE);
 
         // set the switch on/off
         this.buttonBluetoothOnOff.setChecked(this.bluetoothSearch.getBluetoothState());
 
         // if the phone has not bluetooth adapter
         this.buttonBluetoothOnOff.setEnabled(this.checkIFPhoneHasBluetoothAdapter());
-
-        // get loading
-        this.progressBarDiscovery = (ProgressBar) findViewById(R.id.progressBarDiscovery);
-        this.progressBarDiscovery.setProgress(0);
 
         // get the bluetooth switch (paired / discover)
         this.switchBluetooth = (Switch) findViewById(R.id.discover_paired);
@@ -222,11 +213,13 @@ public class HomeActivity extends AppCompatActivity {
                 // Display paired devices
                 if (switchBluetooth.isChecked()) {
                     Toast.makeText(getApplicationContext(), "Display paired devices", Toast.LENGTH_LONG).show();
+                    progressBarDiscovered.setVisibility(View.INVISIBLE);
                     displayPairedDevices();
 
                 // Display discovered devices
                 }else {
                     Toast.makeText(getApplicationContext(), "Display discovery devices", Toast.LENGTH_LONG).show();
+                    progressBarDiscovered.setVisibility(View.VISIBLE);
                     displayDiscoveredDevices();
                 }
             }
@@ -234,11 +227,12 @@ public class HomeActivity extends AppCompatActivity {
 
         // On click list
         this.listViewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
                 final BluetoothDevice selected = pairedDevices.get((int)id);
 
-                Toast.makeText(getApplicationContext(), "Connection to " + selected.getName() + "...", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Connecting to " + selected.getName() + "...", Toast.LENGTH_SHORT).show();
 
                 // try to connect
                 Thread tryConnection = new Thread() {
@@ -273,6 +267,40 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Try to connect to the selected device
+     * @param device
+     */
+    private void tryConnect(BluetoothDevice device){
+        // bluetooth connection class
+        BluetoothConnection bluetoothConnection = new BluetoothConnection(bluetoothAdapter, device, this);
+
+        // try to connect
+        bluetoothConnection.bluetoothConnect();
+    }
+
+    /**
+     * Update luminosity seek bar and check box
+     */
+    private void updateLuminosityControls(){
+        // seek bar
+        try {
+            this.seekBarLuminiosity.setProgress(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS));
+        } catch (Settings.SettingNotFoundException e) {
+            this.seekBarLuminiosity.setProgress(0);
+        }
+
+        // check box
+        try {
+            if(Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE) == 1){
+                this.checkBoxAutoLux.setChecked(true);
+            }else{
+                this.checkBoxAutoLux.setChecked(false);
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            this.checkBoxAutoLux.setChecked(false);
+        }
+    }
 
     /**
      * Display paired bluetooth devices
@@ -295,17 +323,11 @@ public class HomeActivity extends AppCompatActivity {
         // reset list
         this.discoveredDevices = new ArrayList<BluetoothDevice>();
 
-        // update textview
-        //this.bluetoothDiscoveryLoading.setText("Discovery...");
-
         // get list of bluetooth Devices
         this.discoveredDevices = this.bluetoothSearch.getListDiscoveredBluetooth();
 
         // update the list
         this.listViewUpdate(this.discoveredDevices);
-
-        // update textview
-        //this.bluetoothDiscoveryLoading.setText("Discovery end");
     }
 
     /**
@@ -343,5 +365,36 @@ public class HomeActivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         this.bluetoothSearch.onDestroy();
+    }
+
+    @Override
+    public void onBluetoothDiscoveryFound(BluetoothDevice device) {
+        // Add the new device
+        this.discoveredDevices.add(device);
+
+        // update the list
+        this.listViewUpdate(this.discoveredDevices);
+    }
+
+
+    @Override
+    public void onBluetoothConnection(int returnCode) {
+        if(returnCode == Constants.BLUETOOTH_CONNECTED){
+            Intent controlsPage = new Intent(HomeActivity.this, ControlsActivity.class);
+            startActivity(controlsPage);
+        }
+    }
+
+    @Override
+    public void onReceiveData(String data) {
+
+    }
+
+    @Override
+    public void onBluetoothDiscovery(int code) {
+        switch (code){
+            case Constants.BAR_FINISHED:
+                progressBarDiscovered.setVisibility(View.INVISIBLE);
+        }
     }
 }

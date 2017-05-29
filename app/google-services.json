@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "33319203232-aib5l4lhj42vsqkdcuh9q9u7p6r8m12e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fr.esigelec.bluetoothbot",
+            "certificate_hash": "cd82c4e01d6024d6a122ce483c947969a4c41d18"
+          }
+        },
+        {
           "client_id": "33319203232-87sh8nu7huq7n2i8cu7lr5l707tbkjv5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
